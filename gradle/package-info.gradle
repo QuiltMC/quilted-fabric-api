@@ -1,4 +1,5 @@
 import java.nio.file.Files
+import java.time.ZoneId
 
 for (def sourceSet in [
 			sourceSets.main,
@@ -15,7 +16,7 @@ for (def sourceSet in [
 		// Only apply to default source directory since we also add the generated
 		// sources to the source set.
 		sourceRoot = file("src/$sourceSetName/java")
-		header = rootProject.file('HEADER')
+		header = rootProject.file('codeformat/GENERATED_HEADER')
 		outputDir = file("src/generated/$sourceSetName")
 	}
 	sourceSet.java.srcDir task
@@ -43,6 +44,7 @@ class GenerateImplPackageInfos extends DefaultTask {
 		def output = outputDir.get().asFile.toPath()
 		output.deleteDir()
 		def headerText = header.readLines().join("\n") // normalize line endings
+		headerText = headerText.replace("CREATION_YEAR", Integer.toString(java.time.Year.now(ZoneId.of("UTC")).getValue()));
 		def root = sourceRoot.get().asFile.toPath()
 
 		for (def dir in ['impl', 'mixin']) {

@@ -38,8 +38,8 @@ def doConfigureCatalog() {
 			catalogName = 'bom'
 		} else if (catalogName == 'deprecated') {
 			catalogName = 'deprecated-fabric-api'
-		} else if (catalogName == 'fabric-api') {
-			catalogName = 'fabric-api'
+		} else if (catalogName == 'quilted-fabric-api') {
+			catalogName = 'quilted-fabric-api'
 		} else {
 			catalogName = catalogName.substring('fabric-'.length())
 		}
@@ -50,7 +50,7 @@ def doConfigureCatalog() {
 
 		catalog {
 			versionCatalog {
-				library(catalogName, "net.fabricmc.fabric-api:${proj.name}:${proj.version}")
+				library(catalogName, "org.quiltmc.quilted-fabric-api:${proj.name}:${proj.version}")
 			}
 		}
 	}

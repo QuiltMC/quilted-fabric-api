@@ -1,3 +1,12 @@
+# Quilted Fabric API
+
+Quilted Fabric API is a Quilt reimplementation of the [Fabric API](https://github.com/FabricMC/fabric) on top of the [Quilt Standard Libraries](https://github.com/QuiltMC/quilt-standard-libraries).
+
+The main objective is to aid both players and mod developers with the migration to the [Quilt toolchain](https://quiltmc.org) by allowing Fabric mods who depended on the Fabric API to work seamlessly and by letting Fabric API modules who doesn't yet have a QSL equivalent co-exist with other QSL modules.
+
+While we try our best, **keep in mind that mod compatibility might not be 100%!** If you find any issues specific to Quilted Fabric API, please report them on our issue tracker. If you are a developer or player who needs support, check out our [community Discord server](https://discord.quiltmc.org)!
+
+<!-- Fabric Readme
 # Fabric API
 
 Essential hooks for modding with Fabric.
@@ -73,13 +82,13 @@ setOf(
 }
 ```
 
-<!--Linked to gradle documentation on properties-->
+<!--Linked to gradle documentation on properties--\>
 Instead of hardcoding version constants all over the build script, Gradle properties may be used to replace these constants. Properties are defined in the `gradle.properties` file at the root of a project. More information is available [here](https://docs.gradle.org/current/userguide/organizing_gradle_projects.html#declare_properties_in_gradle_properties_file).
 
 ## Contributing
 
 See something Fabric API doesn't support, a bug or something that may be useful? We welcome contributions to improve Fabric API.
-Make sure to read [the development guidelines](./CONTRIBUTING.md).
+Make sure to read [the development guidelines](./FABRIC_CONTRIBUTING).
 
 ## Modules
 
@@ -88,3 +97,4 @@ Fabric API is designed to be modular for ease of updating. This also has the adv
 Each module contains its own `README.md`* explaining the module's purpose and additional info on using the module.
 
 \* The README for each module is being worked on; not every module has a README at the moment
+-->

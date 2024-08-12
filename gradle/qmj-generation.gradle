@@ -1,0 +1,235 @@
+import com.google.gson.Gson
+import com.google.gson.stream.JsonWriter
+
+import java.nio.file.Files
+
+buildscript {
+	repositories {
+		maven {
+			name = 'Quilt'
+			url = 'https://maven.quiltmc.org/repository/release'
+		}
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'org.quiltmc.parsers:json:0.3.0'
+		classpath 'org.quiltmc.parsers:gson:0.3.0'
+		classpath 'com.google.code.gson:gson:2.11.0'
+	}
+}
+
+task generateQuiltMetadata(type: GenerateQuiltMetadata)
+
+class GenerateQuiltMetadata extends DefaultTask {
+	GenerateQuiltMetadata() {
+		group = "quilt"
+
+		outputs.upToDateWhen { false }
+	}
+
+	@Internal
+	def iconBytes
+
+	@TaskAction
+	void runTask() {
+		iconBytes = project.rootProject.file("src/main/resources/assets/fabric/icon.png").bytes
+		project.project(":deprecated").getChildProjects().values().forEach {
+			buildQmj(it, false)
+		}
+
+		project.getChildProjects().values().forEach {
+			if (it.name == "deprecated" || it.name == "fabric-api-bom" || it.name == "fabric-api-catalog") {
+				return
+			}
+
+			buildQmj(it, false)
+		}
+		buildQmj(project, true)
+	}
+
+
+
+	void buildQmj(Project it, boolean rootProj) {
+		// move "fabric.mod.json" to "upstream.fabric.mod.json" (lord forgive me)
+		def modJsonFile = it.file("src/main/resources/fabric.upstream.json")
+		def qmj = it.file("src/main/resources/quilt.mod.json")
+		if (!modJsonFile.exists()) {
+			def unportedJson = it.file("src/main/resources/fabric.mod.json")
+			if (unportedJson.exists()) {
+				unportedJson.renameTo(modJsonFile.toPath().parent.resolve("fabric.upstream.json").toFile())
+			} else {
+				modJsonFile = it.file("src/client/resources/fabric.upstream.json")
+				qmj = it.file("src/client/resources/quilt.mod.json")
+				if (!modJsonFile.exists()) {
+					it.file("src/client/resources/fabric.mod.json").renameTo(modJsonFile.toPath().parent.resolve("fabric.upstream.json").toFile())
+				}
+			}
+		}
+
+		try {
+			buildQmj(modJsonFile.toPath(), qmj.toPath(), it.property("loader_version"), it, rootProj)
+		} catch (Throwable t) {
+			qmj.delete()
+			throw t
+		}
+	}
+
+	void buildQmj(java.nio.file.Path fmjIn, java.nio.file.Path qmj, String loaderVersion, Project project, boolean rootProj) throws IOException {
+		Map<String, Object> fmj = new Gson().fromJson(Files.newBufferedReader(fmjIn), Map.class)
+
+		Files.deleteIfExists(qmj)
+		JsonWriter writer = new JsonWriter(Files.newBufferedWriter(qmj))
+		writer.setIndent("\t")
+		// write everything that is always present
+		writer.beginObject()
+				.name("schema_version").value(1)
+				.name("quilt_loader").beginObject() // root object -> quilt_loader
+				.name("group").value("org.quiltmc.quilted-fabric-api")
+				.name("id").value("quilted_" + fmj["id"].replaceAll('-', '_'))
+				.name("version").value("\${version}")
+				.name("metadata").beginObject() // quilt_loader -> metadata
+				.name("name").value("Quilted " + fmj["name"])
+				.name("description").value(fmj["description"])
+				.name("contributors").beginObject() // metadata -> contributors
+				.name("The Quilt Project").value("Owner")
+				.name("FabricMC").value("Upstream Owner")
+				.endObject() // contributors -> metadata
+				.name("contact").beginObject() // contributors -> contact
+				.name("homepage").value("https://quiltmc.org")
+				.name("issues").value("https://github.com/QuiltMC/quilted-fabric-api/issues")
+				.name("sources").value("https://github.com/QuiltMC/quilted-fabric-api")
+				.endObject() // contact -> metadata
+				.name("license").value("Apache-2.0")
+				.name("icon").value(fmj["icon"])
+				.endObject() // metadata -> quilt_loader
+				.name("intermediate_mappings").value("net.fabricmc:intermediary")
+				.name("load_type").value("always")
+		try {
+			project.file(fmjIn.parent.resolve(fmj["icon"])).setBytes(iconBytes)
+		} catch (FileNotFoundException e) {
+			project.file("src/client/resources/" + fmj["icon"]).setBytes(iconBytes)
+		}
+
+		writer.name("depends").beginArray();
+		writer.beginObject()
+				.name("id").value("quilt_loader")
+				.name("versions").value(">=" + loaderVersion)
+				.endObject()
+		writer.beginObject()
+				.name("id").value("minecraft")
+				.name("versions").value(">=1.21- <1.21.2-")
+				.endObject()
+		// TODO: Depends block
+		// this shouldn't be a huge deal because
+
+		writer.endArray(); // depends -> quilt_loader
+
+		// Provides
+		def version = fmj["version"]
+
+		if (version == '${version}') {
+			version = '${upstream_version}'
+		}
+
+		writer.name("provides").beginArray();
+		writer.beginObject()
+				.name("id").value(fmj["id"])
+				.name("version").value(version)
+				.endObject()
+
+		if (rootProj) {
+			writer.beginObject().name("id").value("fabric").name("version").value(version).endObject()
+		}
+
+		writer.endArray(); // provides -> quilt_loader
+
+		def entrypoints = fmj["entrypoints"]
+
+		if (entrypoints != null) {
+			writer.name("entrypoints").beginObject()
+			entrypoints.each { cat, clazzes ->
+				writer.name(cat)
+						.beginArray()
+				clazzes.each {
+					writer.value(it)
+				}
+				writer.endArray()
+			}
+			writer.endObject()
+		}
+
+
+		writer.endObject(); // quilt_loader -> root object
+
+		def mixins = fmj["mixins"]
+		if (mixins != null) {
+			writer.name("mixin").beginArray()
+			mixins.each {
+				if (it instanceof String) {
+					writer.value(it)
+				} else {
+					writer.beginObject()
+							.name("config").value(it["config"])
+							.name("environment").value(it["environment"])
+							.endObject()
+				}
+			}
+			writer.endArray()
+		}
+
+		def aw = fmj["accessWidener"]
+		if (aw != null) {
+			writer.name("access_widener").value(aw)
+		}
+
+		// some fmjs are missing this apparently
+		def environment = fmj["environment"]
+		if (environment != null) {
+			writer.name("minecraft").beginObject()
+					.name("environment").value(environment)
+					.endObject()
+		}
+
+
+		writer.name("modmenu").beginObject() // root object -> modmenu
+				.name("badges").beginArray().value("library").endArray()
+				.name("parent").beginObject() // modmenu -> parent
+				.name("id").value("quilted_fabric_api")
+				.endObject() // parent -> modmenu
+				.endObject(); // modmenu -> root
+
+
+		def custom = fmj["custom"]
+		def injected
+
+		if (custom != null) {
+			def lifecycle = custom["fabric-api:module-lifecycle"]
+			if (lifecycle != null) {
+				writer.name("fabric-api:module-lifestyle").value(lifecycle)
+			}
+
+			injected = custom["loom:injected_interfaces"]
+			if (injected != null) {
+				writer.name("quilt_loom").beginObject()
+						.name("injected_interfaces").beginObject()
+
+				injected.each {clazz, ifaces ->
+					writer.name(clazz.replace('$', '\\u0024')).beginArray()
+					ifaces.each { writer.value(it.replace('$', '\\u0024')) }
+					writer.endArray()
+				}
+				writer.endObject().endObject()
+			}
+		}
+
+		writer.endObject(); // end root object
+		writer.flush();
+		writer.close();
+
+		// GSON refuses to write these with a single backslash so we'll do it our damn self
+		if (injected != null) {
+			// not worth the micro-optimization to only do this if an escaped char was actually written
+			Files.write(qmj, new String(Files.readAllBytes(qmj)).replace('\\\\u0024', '\\u0024').getBytes())
+		}
+	}
+}

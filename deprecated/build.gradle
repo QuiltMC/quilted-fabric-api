@@ -26,7 +26,7 @@ publishing {
 				// Depend on the main project.
 				def depNode = depsNode.appendNode("dependency")
 				depNode.appendNode("groupId", group)
-				depNode.appendNode("artifactId", "fabric-api")
+				depNode.appendNode("artifactId", "quilted-fabric-api")
 				depNode.appendNode("version", version)
 				depNode.appendNode("scope", "compile")
 			}

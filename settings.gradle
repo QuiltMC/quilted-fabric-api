@@ -1,14 +1,21 @@
 pluginManagement {
 	repositories {
+		gradlePluginPortal()
 		maven {
 			name = 'Fabric'
 			url = 'https://maven.fabricmc.net/'
 		}
-		gradlePluginPortal()
+		maven {
+			name = 'Quilt'
+			url = 'https://maven.quiltmc.org/repository/release'
+		}
+		mavenLocal()
 	}
 }
 
-rootProject.name = "fabric-api"
+
+
+rootProject.name = "quilted-fabric-api"
 
 include 'fabric-api-bom'
 include 'fabric-api-catalog'

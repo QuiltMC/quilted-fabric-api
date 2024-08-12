@@ -1,0 +1,81 @@
+{
+	"schema_version": 1,
+	"quilt_loader": {
+		"group": "org.quiltmc.quilted-fabric-api",
+		"id": "quilted_fabric_data_attachment_api_v1",
+		"version": "${version}",
+		"metadata": {
+			"name": "Quilted Fabric Data Attachment API (v1)",
+			"description": "Allows conveniently attaching data to existing game objects",
+			"contributors": {
+				"The Quilt Project": "Owner",
+				"FabricMC": "Upstream Owner"
+			},
+			"contact": {
+				"homepage": "https://quiltmc.org",
+				"issues": "https://github.com/QuiltMC/quilted-fabric-api/issues",
+				"sources": "https://github.com/QuiltMC/quilted-fabric-api"
+			},
+			"license": "Apache-2.0",
+			"icon": "assets/fabric-data-attachment-api-v1/icon.png"
+		},
+		"intermediate_mappings": "net.fabricmc:intermediary",
+		"load_type": "always",
+		"depends": [
+			{
+				"id": "quilt_loader",
+				"versions": ">=0.26.3"
+			},
+			{
+				"id": "minecraft",
+				"versions": ">=1.21- <1.21.2-"
+			}
+		],
+		"provides": [
+			{
+				"id": "fabric-data-attachment-api-v1",
+				"version": "${upstream_version}"
+			}
+		],
+		"entrypoints": {
+			"main": [
+				"net.fabricmc.fabric.impl.attachment.AttachmentEntrypoint"
+			]
+		}
+	},
+	"mixin": [
+		"fabric-data-attachment-api-v1.mixins.json",
+		{
+			"config": "fabric-data-attachment-api-v1.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"minecraft": {
+		"environment": "*"
+	},
+	"modmenu": {
+		"badges": [
+			"library"
+		],
+		"parent": {
+			"id": "quilted_fabric_api"
+		}
+	},
+	"fabric-api:module-lifestyle": "experimental",
+	"quilt_loom": {
+		"injected_interfaces": {
+			"net/minecraft/class_2586": [
+				"net/fabricmc/fabric/api/attachment/v1/AttachmentTarget"
+			],
+			"net/minecraft/class_2791": [
+				"net/fabricmc/fabric/api/attachment/v1/AttachmentTarget"
+			],
+			"net/minecraft/class_1297": [
+				"net/fabricmc/fabric/api/attachment/v1/AttachmentTarget"
+			],
+			"net/minecraft/class_3218": [
+				"net/fabricmc/fabric/api/attachment/v1/AttachmentTarget"
+			]
+		}
+	}
+}

@@ -1,3 +1,19 @@
+# Contributing
+
+This document outlines best-practices and contributing guidelines to the Quilted Fabric API.
+
+Please keep a CLEAN git history.
+There should be one commit per added QSL module along with one commit for the Quiltification. 
+
+<!-- By contributing to Quilted Fabric API you agree with the [Developer Certificate of Origin (DCO)][DCO]. -->
+
+## Guide: Pull Requests
+
+Please talk to OroArmor about how to best make a PR!
+
+The CONTRIBUTING.md is still unfinished!
+
+<!-- Fabric Contributing guide:
 # Fabric API development guidelines
 
 This document describes the development guidelines for Fabric API. It may be amended at any time. Therefore you should refer to the development guidelines when working on any contributions.
@@ -437,3 +453,4 @@ The supported values for the `ModuleLifecycle` are:
 
 ### Testing
 See the Testing section above. Make sure to describe in the pull request body how you tested your code, and include relevant test mod code with your pull request.
+-->

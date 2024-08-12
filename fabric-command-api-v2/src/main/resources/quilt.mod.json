@@ -1,0 +1,68 @@
+{
+	"schema_version": 1,
+	"quilt_loader": {
+		"group": "org.quiltmc.quilted-fabric-api",
+		"id": "quilted_fabric_command_api_v2",
+		"version": "${version}",
+		"metadata": {
+			"name": "Quilted Fabric Command API (v2)",
+			"description": "Adds command-related hooks.",
+			"contributors": {
+				"The Quilt Project": "Owner",
+				"FabricMC": "Upstream Owner"
+			},
+			"contact": {
+				"homepage": "https://quiltmc.org",
+				"issues": "https://github.com/QuiltMC/quilted-fabric-api/issues",
+				"sources": "https://github.com/QuiltMC/quilted-fabric-api"
+			},
+			"license": "Apache-2.0",
+			"icon": "assets/fabric-command-api-v2/icon.png"
+		},
+		"intermediate_mappings": "net.fabricmc:intermediary",
+		"load_type": "always",
+		"depends": [
+			{
+				"id": "quilt_loader",
+				"versions": ">=0.26.3"
+			},
+			{
+				"id": "minecraft",
+				"versions": ">=1.21- <1.21.2-"
+			}
+		],
+		"provides": [
+			{
+				"id": "fabric-command-api-v2",
+				"version": "${upstream_version}"
+			}
+		]
+	},
+	"mixin": [
+		"fabric-command-api-v2.mixins.json",
+		{
+			"config": "fabric-command-api-v2.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"access_widener": "fabric-command-api-v2.accesswidener",
+	"minecraft": {
+		"environment": "*"
+	},
+	"modmenu": {
+		"badges": [
+			"library"
+		],
+		"parent": {
+			"id": "quilted_fabric_api"
+		}
+	},
+	"fabric-api:module-lifestyle": "stable",
+	"quilt_loom": {
+		"injected_interfaces": {
+			"net/minecraft/class_2303": [
+				"net/fabricmc/fabric/api/command/v2/FabricEntitySelectorReader"
+			]
+		}
+	}
+}

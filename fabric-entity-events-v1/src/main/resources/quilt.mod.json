@@ -1,0 +1,60 @@
+{
+	"schema_version": 1,
+	"quilt_loader": {
+		"group": "org.quiltmc.quilted-fabric-api",
+		"id": "quilted_fabric_entity_events_v1",
+		"version": "${version}",
+		"metadata": {
+			"name": "Quilted Fabric Entity Events (v1)",
+			"description": "Events to hook into entities.",
+			"contributors": {
+				"The Quilt Project": "Owner",
+				"FabricMC": "Upstream Owner"
+			},
+			"contact": {
+				"homepage": "https://quiltmc.org",
+				"issues": "https://github.com/QuiltMC/quilted-fabric-api/issues",
+				"sources": "https://github.com/QuiltMC/quilted-fabric-api"
+			},
+			"license": "Apache-2.0",
+			"icon": "assets/fabric-entity-events-v1/icon.png"
+		},
+		"intermediate_mappings": "net.fabricmc:intermediary",
+		"load_type": "always",
+		"depends": [
+			{
+				"id": "quilt_loader",
+				"versions": ">=0.26.3"
+			},
+			{
+				"id": "minecraft",
+				"versions": ">=1.21- <1.21.2-"
+			}
+		],
+		"provides": [
+			{
+				"id": "fabric-entity-events-v1",
+				"version": "${upstream_version}"
+			}
+		]
+	},
+	"mixin": [
+		"fabric-entity-events-v1.mixins.json",
+		{
+			"config": "fabric-entity-events-v1.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"minecraft": {
+		"environment": "*"
+	},
+	"modmenu": {
+		"badges": [
+			"library"
+		],
+		"parent": {
+			"id": "quilted_fabric_api"
+		}
+	},
+	"fabric-api:module-lifestyle": "stable"
+}

@@ -4,17 +4,18 @@ plugins {
 	id "idea"
 	id "maven-publish"
 	id 'jacoco'
-	id "fabric-loom" version "1.6.11" apply false
+	id "org.quiltmc.loom" version "1.7.3" apply false
 	id "com.diffplug.spotless" version "6.20.0"
 	id "org.ajoberstar.grgit" version "5.2.2"
 	id "me.modmuss50.remotesign" version "0.4.0" apply false
 	id "me.modmuss50.mod-publish-plugin" version "0.4.5"
+	id "dev.yumi.gradle.licenser" version "1.2.+"
 }
 
 def ENV = System.getenv()
 
-version = project.version + "+" + (ENV.GITHUB_RUN_NUMBER ? "" : "local-") + getBranch()
-logger.lifecycle("Building Fabric: " + version)
+version = "$project.version+${ENV.GITHUB_RUN_NUMBER ? '' : 'local-'}$project.upstream_version-${getBranch()}${ENV.SNAPSHOTS_URL ? '-SNAPSHOT' : ''}"
+logger.lifecycle("Building QFAPI: " + version)
 
 def metaProjects = [
 	'deprecated',
@@ -33,7 +34,15 @@ import net.fabricmc.loom.util.gradle.SourceSetHelper
 import groovy.json.JsonSlurper
 import org.apache.commons.codec.digest.DigestUtils
 
+def getQslModule(String library, String module) {
+	return "org.quiltmc.qsl.$library:$module:$project.qsl_version"
+}
+
 def getSubprojectVersion(project) {
+	return version
+}
+
+def getUpstreamSubprojectVersion(project) {
 	// Get the version from the gradle.properties file
 	def version = project.properties["${project.name}-version"]
 
@@ -118,7 +127,7 @@ def testDependencies(project, List<String> depNames) {
 }
 
 allprojects {
-	group = "net.fabricmc.fabric-api"
+	group = "org.quiltmc.quilted-fabric-api"
 
 	apply plugin: "maven-publish"
 	apply plugin: "me.modmuss50.remotesign"
@@ -150,8 +159,9 @@ allprojects {
 
 	apply plugin: "java-library"
 	apply plugin: "checkstyle"
-	apply plugin: "fabric-loom"
+	apply plugin: "org.quiltmc.loom"
 	apply plugin: "com.diffplug.spotless"
+	apply plugin: "dev.yumi.gradle.licenser"
 
 	tasks.withType(JavaCompile).configureEach {
 		it.options.release = 21
@@ -230,17 +240,21 @@ allprojects {
 		}
 	}
 
+	repositories {
+		mavenLocal()
+	}
+
 	dependencies {
 		minecraft "com.mojang:minecraft:$rootProject.minecraft_version"
 		mappings "net.fabricmc:yarn:${rootProject.minecraft_version}${project.yarn_version}:v2"
-		modApi "net.fabricmc:fabric-loader:${project.loader_version}"
+		modApi "org.quiltmc:quilt-loader:${project.loader_version}"
 
 		testmodImplementation sourceSets.main.output
 		testmodClientImplementation sourceSets.main.output
 		testmodClientImplementation sourceSets.client.output
 		testmodClientImplementation sourceSets.testmod.output
 
-		testImplementation "net.fabricmc:fabric-loader-junit:${project.loader_version}"
+		testImplementation "org.quiltmc:quilt-loader-junit:${project.loader_version}"
 		testImplementation sourceSets.testmodClient.output
 		testImplementation 'org.mockito:mockito-core:5.4.0'
 	}
@@ -258,15 +272,15 @@ allprojects {
 					}
 					.collect(Collectors.joining(File.pathSeparator+File.pathSeparator))
 
-			systemProperty("fabric.classPathGroups", classPathGroups)
+			systemProperty("loader.classPathGroups", classPathGroups)
 		}
 	}
 
 	tasks.withType(ProcessResources).configureEach {
 		inputs.property "version", project.version
-
-		filesMatching("fabric.mod.json") {
-			expand "version": project.version
+		inputs.property "upstream_version", project.upstream_version
+		filesMatching("quilt.mod.json") {
+			expand "version": project.version, "upstream_version": project.upstream_version
 		}
 	}
 
@@ -274,17 +288,22 @@ allprojects {
 		lineEndings = com.diffplug.spotless.LineEnding.UNIX
 
 		java {
-			licenseHeaderFile(rootProject.file("HEADER"))
 			removeUnusedImports()
-			importOrder('java', 'javax', '', 'net.minecraft', 'net.fabricmc')
+			importOrder('java', 'javax', '', 'net.minecraft', 'net.fabricmc', 'org.quiltmc')
 			indentWithTabs()
 			trimTrailingWhitespace()
 		}
 	}
 
 	checkstyle {
-		configFile = rootProject.file("checkstyle.xml")
+		configFile = rootProject.file("codeformat/checkstyle.xml")
 		toolVersion = "10.12.1"
+	}
+
+	license {
+		rule rootProject.file("codeformat/HEADER")
+
+		include "**/*.java"
 	}
 
 	tasks.withType(AbstractArchiveTask).configureEach {
@@ -365,6 +384,7 @@ remapTestmodJar {
 // This must be done after all plugins are applied to subprojects
 apply from: "gradle/module-validation.gradle"
 apply from: "gradle/module-versioning.gradle"
+apply from: "gradle/qmj-generation.gradle"
 
 loom {
 	// Required as the item-group API uses access widened classes in its API, without this the javadoc generation fails.
@@ -494,81 +514,64 @@ configurations {
 	productionRuntimeServer
 }
 
-dependencies {
-	productionRuntime "net.fabricmc:fabric-loader:${project.loader_version}"
-	productionRuntime "net.fabricmc:intermediary:${project.minecraft_version}"
-
-	productionRuntimeServer "net.fabricmc:fabric-installer:${project.installer_version}:server"
-}
-
-import net.fabricmc.loom.util.Platform
-
-// This is very far beyond loom's API if you copy this, you're on your own.
-tasks.register('runProductionAutoTestClient', JavaExec) {
-	dependsOn remapJar, remapTestmodJar, downloadAssets
-	classpath.from configurations.productionRuntime
-	mainClass = "net.fabricmc.loader.impl.launch.knot.KnotClient"
-	workingDir = file("run")
-
-	doFirst {
-		classpath.from loom.minecraftProvider.minecraftClientJar
-		workingDir.mkdirs()
-
-		args(
-				"--assetIndex", loom.minecraftProvider.versionInfo.assetIndex().fabricId(loom.minecraftProvider.minecraftVersion()),
-				"--assetsDir", new File(loom.files.userCache, "assets").absolutePath,
-				"--gameDir", workingDir.absolutePath
-				)
-
-		if (Platform.CURRENT.operatingSystem.isMacOS()) {
-			jvmArgs(
-					"-XstartOnFirstThread"
-					)
-		}
-
-		jvmArgs(
-				"-Dfabric.addMods=${remapJar.archiveFile.get().asFile.absolutePath}${File.pathSeparator}${remapTestmodJar.archiveFile.get().asFile.absolutePath}",
-				"-Dfabric.autoTest",
-				"-Dfabric-tag-conventions-v2.missingTagTranslationWarning=fail",
-				"-Dfabric-tag-conventions-v1.legacyTagWarning=fail"
-				)
-		jvmArgs(debugArgs)
-	}
-}
-
-tasks.register('serverPropertiesJar', Jar) {
-	def propsFile = file("build/tmp/install.properties")
-
-	doFirst {
-		propsFile.text = """\
-						fabric-loader-version=${project.loader_version}
-						game-version=${project.minecraft_version}
-						""".stripMargin().stripIndent()
-	}
-
-	archiveFileName = "test-server-properties.jar"
-	destinationDirectory = file("build/tmp")
-	from(propsFile)
-}
-
-tasks.register('runProductionAutoTestServer', JavaExec) {
-	dependsOn remapJar, remapTestmodJar, serverPropertiesJar
-	classpath.from configurations.productionRuntimeServer, serverPropertiesJar
-	mainClass = "net.fabricmc.installer.ServerLauncher"
-	workingDir = file("run")
-
-	doFirst {
-		workingDir.mkdirs()
-
-		jvmArgs(
-				"-Dfabric.addMods=${remapJar.archiveFile.get().asFile.absolutePath}${File.pathSeparator}${remapTestmodJar.archiveFile.get().asFile.absolutePath}",
-				"-Dfabric.autoTest",
-				)
-		jvmArgs(debugArgs)
-
-		args("nogui")
-	}
-}
+// Quilt: We don't have a way to use the quilt installer like this, yet.
+/*
+ import net.fabricmc.loom.util.Platform
+ // This is very far beyond loom's API if you copy this, you're on your own.
+ tasks.register('runProductionAutoTestClient', JavaExec) {
+ dependsOn remapJar, remapTestmodJar, downloadAssets
+ classpath.from configurations.productionRuntime
+ mainClass = "net.fabricmc.loader.impl.launch.knot.KnotClient"
+ workingDir = file("run")
+ doFirst {
+ classpath.from loom.minecraftProvider.minecraftClientJar
+ workingDir.mkdirs()
+ args(
+ "--assetIndex", loom.minecraftProvider.versionInfo.assetIndex().fabricId(loom.minecraftProvider.minecraftVersion()),
+ "--assetsDir", new File(loom.files.userCache, "assets").absolutePath,
+ "--gameDir", workingDir.absolutePath
+ )
+ if (Platform.CURRENT.operatingSystem.isMacOS()) {
+ jvmArgs(
+ "-XstartOnFirstThread"
+ )
+ }
+ jvmArgs(
+ "-Dfabric.addMods=${remapJar.archiveFile.get().asFile.absolutePath}${File.pathSeparator}${remapTestmodJar.archiveFile.get().asFile.absolutePath}",
+ "-Dfabric.autoTest",
+ "-Dfabric-tag-conventions-v2.missingTagTranslationWarning=fail",
+ "-Dfabric-tag-conventions-v1.legacyTagWarning=fail"
+ )
+ jvmArgs(debugArgs)
+ }
+ }
+ tasks.register('serverPropertiesJar', Jar) {
+ def propsFile = file("build/tmp/install.properties")
+ doFirst {
+ propsFile.text = """\
+ fabric-loader-version=${project.loader_version}
+ game-version=${project.minecraft_version}
+ """.stripMargin().stripIndent()
+ }
+ archiveFileName = "test-server-properties.jar"
+ destinationDirectory = file("build/tmp")
+ from(propsFile)
+ }
+ tasks.register('runProductionAutoTestServer', JavaExec) {
+ dependsOn remapJar, remapTestmodJar, serverPropertiesJar
+ classpath.from configurations.productionRuntimeServer, serverPropertiesJar
+ mainClass = "net.fabricmc.installer.ServerLauncher"
+ workingDir = file("run")
+ doFirst {
+ workingDir.mkdirs()
+ jvmArgs(
+ "-Dfabric.addMods=${remapJar.archiveFile.get().asFile.absolutePath}${File.pathSeparator}${remapTestmodJar.archiveFile.get().asFile.absolutePath}",
+ "-Dfabric.autoTest",
+ )
+ jvmArgs(debugArgs)
+ args("nogui")
+ }
+ }*/
 
 // Format all the gradle files
 spotless {
@@ -579,36 +582,41 @@ spotless {
 }
 
 def addPomMetadataInformation(Project project, MavenPom pom) {
-	def modJsonFile = project.file("src/main/resources/fabric.mod.json")
+	def modJsonFile = project.file("src/main/resources/fabric.upstream.json")
 
 	if (!modJsonFile.exists()) {
-		modJsonFile = project.file("src/client/resources/fabric.mod.json")
+		modJsonFile = project.file("src/client/resources/fabric.upstream.json")
+	}
+
+	if (!modJsonFile.exists()) {
+		println("missing fmj, you probably need to run gradlew :generateQuiltMetadata")
+		return
 	}
 
 	def modJson = new JsonSlurper().parse(modJsonFile)
 	pom.name = modJson.name
-	pom.url = "https://github.com/FabricMC/fabric/tree/HEAD/${project.rootDir.relativePath(project.projectDir)}"
+	pom.url = "https://github.com/quiltmc/quilt-standard-libraries"
 	pom.description = modJson.description
 	pom.licenses {
 		license {
 			name = "Apache-2.0"
-			url = "https://github.com/FabricMC/fabric/blob/HEAD/LICENSE"
+			url = "https://github.com/quiltmc/quilt-standard-libraries/blob/HEAD/LICENSE"
 		}
 	}
 	pom.developers {
 		developer {
-			name = "FabricMC"
-			url = "https://fabricmc.net/"
+			name = "The Quilt Project"
+			url = "https://quiltmc.org/"
 		}
 	}
 	pom.scm {
-		connection = "scm:git:https://github.com/FabricMC/fabric.git"
-		url = "https://github.com/FabricMC/fabric"
-		developerConnection = "scm:git:git@github.com:FabricMC/fabric.git"
+		connection = "scm:git:https://github.com/QuiltMC/quilt-standard-libraries.git"
+		url = "https://github.com/quiltmc/quilt-standard-libraries"
+		developerConnection = "scm:git:git@github.com:QuiltMC/quilt-standard-libraries.git"
 	}
 	pom.issueManagement {
 		system = "GitHub"
-		url = "https://github.com/FabricMC/fabric/issues"
+		url = "https://github.com/QuiltMC/quilt-standard-libraries/issues"
 	}
 }
 
@@ -617,8 +625,9 @@ subprojects {
 		return
 	}
 
+	project.upstream_version = getUpstreamSubprojectVersion(it)
 	base {
-		archivesName = project.name
+		archivesName = "quilted_${project.name.replaceAll("-", "_")}"
 	}
 
 	dependencies {
@@ -736,6 +745,36 @@ subprojects.each {
 // These modules are not included in the fat jar, maven will resolve them via the pom.
 def devOnlyModules = ["fabric-gametest-api-v1",]
 
+// Quilt: Bundle all QSL modules with the fat jar
+
+java.util.stream.Stream<ResolvedDependency> getAllQslModules() {
+	return configurations.named('qsl').get().resolvedConfiguration.firstLevelModuleDependencies.stream().flatMap { qsl ->
+		qsl.children.stream()
+	}.flatMap { library ->
+		library.children.stream()
+	}.filter { module ->
+		// this should only be QSL modules, but it can't hurt to filter out
+		if (module.moduleGroup.startsWith('org.quiltmc.qsl') && module.moduleGroup.split('\\.').length == 4) {
+			return true
+		} else {
+			throw RuntimeException("Unexpected dependency: $it")
+		}
+	}
+}
+
+configurations {
+	qsl
+}
+
+dependencies {
+	qsl modApi("org.quiltmc:qsl:${project.qsl_version}")
+	afterEvaluate {
+		getAllQslModules().forEach {
+			include "$it.moduleGroup:$it.moduleName:$it.moduleVersion"
+		}
+	}
+}
+
 dependencies {
 	afterEvaluate {
 		subprojects.each {
@@ -767,25 +806,25 @@ remapJar {
 
 publishMods {
 	file = signRemapJar.output
-	changelog = providers.environmentVariable("CHANGELOG").getOrElse("No changelog provided")
+	changelog = "Provides Fabric API ${project.upstream_version}\n" + providers.environmentVariable("CHANGELOG").getOrElse("No changelog provided")
 	type = project.prerelease == "true" ? BETA : STABLE
-	displayName = "[${project.minecraft_version}] Fabric API $project.version"
-	modLoaders.add("fabric")
+	displayName = "[$project.minecraft_version] QFAPI " + project.version.split('\\+')[0] + " and QSL " + project.qsl_version.split('\\+')[0]
+	modLoaders.add("quilt")
 	dryRun = providers.environmentVariable("CURSEFORGE_API_KEY").getOrNull() == null
 
 	curseforge {
 		accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
-		projectId = "306612"
+		projectId = "634179"
 		minecraftVersions.add(project.curseforge_minecraft_version)
 	}
 	modrinth {
 		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
-		projectId = "P7dR8mSH"
+		projectId = "qvIfYCYJ"
 		minecraftVersions.add(project.minecraft_version)
 	}
 	github {
 		accessToken = providers.environmentVariable("GITHUB_TOKEN")
-		repository = providers.environmentVariable("GITHUB_REPOSITORY").getOrElse("FabricMC/dryrun")
+		repository = providers.environmentVariable("GITHUB_REPOSITORY").getOrElse("QuiltMC/dryrun")
 		commitish = providers.environmentVariable("GITHUB_REF_NAME").getOrElse("dryrun")
 	}
 }
@@ -797,7 +836,7 @@ import java.util.stream.Collectors
 // A task to ensure that the version being released has not already been released.
 tasks.register('checkVersion') {
 	doFirst {
-		def xml = new URL("https://maven.fabricmc.net/net/fabricmc/fabric-api/fabric-api/maven-metadata.xml").text
+		def xml = new URL("https://maven.quiltmc.org/repository/release/org/quiltmc/quilted-fabric-api/quilted-fabric-api/maven-metadata.xml").text
 		def metadata = new XmlSlurper().parseText(xml)
 		def versions = metadata.versioning.versions.version*.text();
 		if (versions.contains(version)) {
