@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2024 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +24,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
+import net.fabricmc.fabric.impl.base.event.QuiltCompatEvent;
 
 public final class ServerLifecycleEvents {
 	private ServerLifecycleEvents() {
@@ -32,23 +34,29 @@ public final class ServerLifecycleEvents {
 	 * Called when a Minecraft server is starting.
 	 *
 	 * <p>This occurs before the {@link PlayerManager player manager} and any worlds are loaded.
+	 *
+	 * @deprecated see {@link org.quiltmc.qsl.lifecycle.api.event.ServerLifecycleEvents#STARTING STARTING}
 	 */
-	public static final Event<ServerStarting> SERVER_STARTING = EventFactory.createArrayBacked(ServerStarting.class, callbacks -> server -> {
-		for (ServerStarting callback : callbacks) {
-			callback.onServerStarting(server);
-		}
-	});
+	@Deprecated
+	public static final Event<ServerStarting> SERVER_STARTING = QuiltCompatEvent.fromQuilt(
+			org.quiltmc.qsl.lifecycle.api.event.ServerLifecycleEvents.STARTING,
+			event -> event::onServerStarting,
+			event -> event.get()::startingServer
+	);
 
 	/**
 	 * Called when a Minecraft server has started and is about to tick for the first time.
 	 *
 	 * <p>At this stage, all worlds are live.
+	 *
+	 * @deprecated see {@link org.quiltmc.qsl.lifecycle.api.event.ServerLifecycleEvents#READY READY}
 	 */
-	public static final Event<ServerStarted> SERVER_STARTED = EventFactory.createArrayBacked(ServerStarted.class, (callbacks) -> (server) -> {
-		for (ServerStarted callback : callbacks) {
-			callback.onServerStarted(server);
-		}
-	});
+	@Deprecated
+	public static final Event<ServerStarted> SERVER_STARTED = QuiltCompatEvent.fromQuilt(
+			org.quiltmc.qsl.lifecycle.api.event.ServerLifecycleEvents.READY,
+			event -> event::onServerStarted,
+			event -> event.get()::readyServer
+	);
 
 	/**
 	 * Called when a Minecraft server has started shutting down.
@@ -57,12 +65,15 @@ public final class ServerLifecycleEvents {
 	 * <p>For example, an integrated server will begin stopping, but its client may continue to run.
 	 *
 	 * <p>All worlds are still present and can be modified.
+	 *
+	 * @deprecated see {@link org.quiltmc.qsl.lifecycle.api.event.ServerLifecycleEvents#STOPPING STOPPING}
 	 */
-	public static final Event<ServerStopping> SERVER_STOPPING = EventFactory.createArrayBacked(ServerStopping.class, (callbacks) -> (server) -> {
-		for (ServerStopping callback : callbacks) {
-			callback.onServerStopping(server);
-		}
-	});
+	@Deprecated
+	public static final Event<ServerStopping> SERVER_STOPPING = QuiltCompatEvent.fromQuilt(
+			org.quiltmc.qsl.lifecycle.api.event.ServerLifecycleEvents.STOPPING,
+			event -> event::onServerStopping,
+			event -> event.get()::stoppingServer
+	);
 
 	/**
 	 * Called when a Minecraft server has stopped.
@@ -70,12 +81,15 @@ public final class ServerLifecycleEvents {
 	 *
 	 * <p>For example, an {@link net.fabricmc.api.EnvType#CLIENT integrated server} will begin stopping, but its client may continue to run.
 	 * Meanwhile, for a {@link net.fabricmc.api.EnvType#SERVER dedicated server}, this will be the last event called.
+	 *
+	 * @deprecated see {@link org.quiltmc.qsl.lifecycle.api.event.ServerLifecycleEvents#STOPPED STOPPED}
 	 */
-	public static final Event<ServerStopped> SERVER_STOPPED = EventFactory.createArrayBacked(ServerStopped.class, callbacks -> server -> {
-		for (ServerStopped callback : callbacks) {
-			callback.onServerStopped(server);
-		}
-	});
+	@Deprecated
+	public static final Event<ServerStopped> SERVER_STOPPED = QuiltCompatEvent.fromQuilt(
+			org.quiltmc.qsl.lifecycle.api.event.ServerLifecycleEvents.STOPPED,
+			event -> event::onServerStopped,
+			event -> event.get()::exitServer
+	);
 
 	/**
 	 * Called when a Minecraft server is about to send tag and recipe data to a player.

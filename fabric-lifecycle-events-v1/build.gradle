@@ -5,3 +5,7 @@ loom {
 }
 
 moduleDependencies(project, ['fabric-api-base'])
+
+dependencies {
+	modApi getQslModule("core", "lifecycle_events")
+}

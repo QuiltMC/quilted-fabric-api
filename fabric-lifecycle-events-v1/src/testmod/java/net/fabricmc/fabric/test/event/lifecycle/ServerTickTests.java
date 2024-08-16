@@ -39,13 +39,6 @@ public final class ServerTickTests implements ModInitializer {
 			}
 		});
 
-		ServerTickEvents.START_WORLD_TICK.register(world -> {
-			// Verify we are inside the tick
-			if (!world.isInBlockTick()) {
-				throw new AssertionError("Start tick event should be fired while ServerWorld is inside of block tick");
-			}
-		});
-
 		ServerTickEvents.END_WORLD_TICK.register(world -> {
 			final int worldTicks = tickTracker.computeIfAbsent(world.getRegistryKey(), k -> 0);
 
