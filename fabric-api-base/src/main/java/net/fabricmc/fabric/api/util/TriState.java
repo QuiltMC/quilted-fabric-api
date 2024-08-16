@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2024 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +26,10 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * Represents a boolean value which can be true, false or refer to a default value.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.base.api.util.TriState TriState}
  */
+@Deprecated
 public enum TriState {
 	/**
 	 * Represents the boolean value of {@code false}.
@@ -135,5 +139,21 @@ public enum TriState {
 		}
 
 		throw exceptionSupplier.get();
+	}
+
+	public org.quiltmc.qsl.base.api.util.TriState toQuilt() {
+		return switch (this) {
+		case FALSE -> org.quiltmc.qsl.base.api.util.TriState.FALSE;
+		case DEFAULT -> org.quiltmc.qsl.base.api.util.TriState.DEFAULT;
+		case TRUE -> org.quiltmc.qsl.base.api.util.TriState.TRUE;
+		};
+	}
+
+	public static TriState fromQuilt(org.quiltmc.qsl.base.api.util.TriState quilt) {
+		return switch (quilt) {
+		case FALSE -> FALSE;
+		case DEFAULT -> DEFAULT;
+		case TRUE -> TRUE;
+		};
 	}
 }

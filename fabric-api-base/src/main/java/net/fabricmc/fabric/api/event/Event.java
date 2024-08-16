@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2024 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +26,10 @@ import net.minecraft.util.Identifier;
  *
  * @param <T> The listener type.
  * @see EventFactory
+ *
+ * @deprecated see {@link org.quiltmc.qsl.base.api.event.Event Event}
  */
+@Deprecated
 @ApiStatus.NonExtendable // Should only be extended by fabric API.
 public abstract class Event<T> {
 	/**

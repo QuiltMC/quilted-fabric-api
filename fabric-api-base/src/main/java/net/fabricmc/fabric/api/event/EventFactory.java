@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2024 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +25,10 @@ import net.fabricmc.fabric.impl.base.event.EventFactoryImpl;
 
 /**
  * Helper for creating {@link Event} classes.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.base.api.event.Event Event}
  */
+@Deprecated
 public final class EventFactory {
 	private EventFactory() { }
 

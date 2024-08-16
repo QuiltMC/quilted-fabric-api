@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2024 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +47,10 @@ import java.lang.annotation.Target;
  * <p>This is a documentation-only annotation, the event factory has to implement the functionality explicitly by checking the parameter type and invoking it.
  * On top of adding this annotation, the event field or method should document which parameters are context parameters,
  * and under which circumstances they are invoked.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.base.api.event.ParameterInvokingEvent ParameterInvokingEvent}
  */
+@Deprecated
 // TODO: explore enforcing that auto-invoked listeners don't register themselves.
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

@@ -5,3 +5,7 @@ testDependencies(project, [
 	':fabric-lifecycle-events-v1',
 	':fabric-screen-api-v1'
 ])
+
+dependencies {
+	modApi getQslModule("core", "qsl_base")
+}
