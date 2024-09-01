@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +17,6 @@
 
 package net.fabricmc.fabric.api.registry;
 
-import java.util.Map;
 import java.util.Objects;
 
 import org.slf4j.Logger;
@@ -25,12 +25,11 @@ import org.slf4j.LoggerFactory;
 import net.minecraft.block.Block;
 import net.minecraft.state.property.Properties;
 
-import net.fabricmc.fabric.impl.content.registry.util.ImmutableCollectionUtils;
-import net.fabricmc.fabric.mixin.content.registry.AxeItemAccessor;
-
 /**
  * A registry for axe stripping interactions. A vanilla example is turning logs to stripped logs.
+ * @deprecated see {@link org.quiltmc.qsl.block.content.registry.api.BlockContentRegistries#STRIPPABLE STRIPPABLE}
  */
+@Deprecated
 public final class StrippableBlockRegistry {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StrippableBlockRegistry.class);
 
@@ -50,11 +49,11 @@ public final class StrippableBlockRegistry {
 		requireNonNullAndAxisProperty(input, "input block");
 		requireNonNullAndAxisProperty(stripped, "stripped block");
 
-		Block old = getRegistry().put(input, stripped);
-
-		if (old != null) {
+		org.quiltmc.qsl.block.content.registry.api.BlockContentRegistries.FLATTENABLE.get(input).ifPresent(old -> {
 			LOGGER.debug("Replaced old stripping mapping from {} to {} with {}", input, old, stripped);
-		}
+		});
+
+		org.quiltmc.quilted_fabric_api.impl.content.registry.util.QuiltDeferringQueues.addEntry(org.quiltmc.qsl.block.content.registry.api.BlockContentRegistries.STRIPPABLE, input, stripped);
 	}
 
 	private static void requireNonNullAndAxisProperty(Block block, String name) {
@@ -63,9 +62,5 @@ public final class StrippableBlockRegistry {
 		if (!block.getStateManager().getProperties().contains(Properties.AXIS)) {
 			throw new IllegalArgumentException(name + " must have the 'axis' property");
 		}
-	}
-
-	private static Map<Block, Block> getRegistry() {
-		return ImmutableCollectionUtils.getAsMutableMap(AxeItemAccessor::getStrippedBlocks, AxeItemAccessor::setStrippedBlocks);
 	}
 }

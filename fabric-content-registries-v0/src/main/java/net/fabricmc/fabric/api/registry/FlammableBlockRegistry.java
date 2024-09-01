@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +24,10 @@ import net.minecraft.registry.tag.TagKey;
 import net.fabricmc.fabric.api.util.Block2ObjectMap;
 import net.fabricmc.fabric.impl.content.registry.FlammableBlockRegistryImpl;
 
+/**
+ * @deprecated see {@link org.quiltmc.qsl.block.content.registry.api.BlockContentRegistries#FLAMMABLE FLAMMABLE}
+ */
+@Deprecated
 public interface FlammableBlockRegistry extends Block2ObjectMap<FlammableBlockRegistry.Entry> {
 	static FlammableBlockRegistry getDefaultInstance() {
 		return getInstance(Blocks.FIRE);
@@ -46,6 +51,14 @@ public interface FlammableBlockRegistry extends Block2ObjectMap<FlammableBlockRe
 		public Entry(int burn, int spread) {
 			this.burn = burn;
 			this.spread = spread;
+		}
+
+		public static Entry fromQuilt(org.quiltmc.qsl.block.content.registry.api.FlammableBlockEntry quiltEntry) {
+			return new Entry(quiltEntry.burn(), quiltEntry.spread());
+		}
+
+		public org.quiltmc.qsl.block.content.registry.api.FlammableBlockEntry toQuilt() {
+			return new org.quiltmc.qsl.block.content.registry.api.FlammableBlockEntry(this.burn, this.spread);
 		}
 
 		public int getBurnChance() {

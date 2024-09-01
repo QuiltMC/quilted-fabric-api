@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +20,13 @@ package net.fabricmc.fabric.api.registry;
 import java.util.Objects;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.Oxidizable;
-import net.minecraft.item.HoneycombItem;
 
 /**
  * Provides methods for registering oxidizable and waxable blocks.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.block.content.registry.api.BlockContentRegistries#OXIDIZABLE OXIDIZABLE} and {@link org.quiltmc.qsl.block.content.registry.api.BlockContentRegistries#WAXABLE WAXABLE}
  */
+@Deprecated
 public final class OxidizableBlocksRegistry {
 	private OxidizableBlocksRegistry() {
 	}
@@ -34,11 +36,14 @@ public final class OxidizableBlocksRegistry {
 	 *
 	 * @param less the variant with less oxidation
 	 * @param more the variant with more oxidation
+	 *
+	 * @deprecated see {@link org.quiltmc.qsl.block.content.registry.api.BlockContentRegistries#OXIDIZABLE OXIDIZABLE}
 	 */
+	@Deprecated
 	public static void registerOxidizableBlockPair(Block less, Block more) {
 		Objects.requireNonNull(less, "Oxidizable block cannot be null!");
 		Objects.requireNonNull(more, "Oxidizable block cannot be null!");
-		Oxidizable.OXIDATION_LEVEL_INCREASES.get().put(less, more);
+		org.quiltmc.quilted_fabric_api.impl.content.registry.util.QuiltDeferringQueues.addEntry(org.quiltmc.qsl.block.content.registry.api.BlockContentRegistries.OXIDIZABLE, less, new org.quiltmc.qsl.block.content.registry.api.ReversibleBlockEntry(more, true));
 	}
 
 	/**
@@ -46,10 +51,13 @@ public final class OxidizableBlocksRegistry {
 	 *
 	 * @param unwaxed the unwaxed variant
 	 * @param waxed   the waxed variant
+	 *
+	 * @deprecated see {@link org.quiltmc.qsl.block.content.registry.api.BlockContentRegistries#WAXABLE WAXABLE}
 	 */
+	@Deprecated
 	public static void registerWaxableBlockPair(Block unwaxed, Block waxed) {
 		Objects.requireNonNull(unwaxed, "Unwaxed block cannot be null!");
 		Objects.requireNonNull(waxed, "Waxed block cannot be null!");
-		HoneycombItem.UNWAXED_TO_WAXED_BLOCKS.get().put(unwaxed, waxed);
+		org.quiltmc.quilted_fabric_api.impl.content.registry.util.QuiltDeferringQueues.addEntry(org.quiltmc.qsl.block.content.registry.api.BlockContentRegistries.WAXABLE, unwaxed, new org.quiltmc.qsl.block.content.registry.api.ReversibleBlockEntry(waxed, true));
 	}
 }

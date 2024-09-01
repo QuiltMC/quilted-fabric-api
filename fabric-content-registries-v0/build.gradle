@@ -9,3 +9,8 @@ moduleDependencies(project, [
 	'fabric-lifecycle-events-v1',
 	'fabric-resource-loader-v0'
 ])
+
+dependencies {
+	modApi getQslModule("block", "block_content_registry")
+	modApi getQslModule("core", "registry")
+}

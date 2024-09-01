@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +25,12 @@ import org.slf4j.LoggerFactory;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 
-import net.fabricmc.fabric.mixin.content.registry.ShovelItemAccessor;
-
 /**
  * A registry for shovel flattening interactions. A vanilla example is turning dirt to dirt paths.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.block.content.registry.api.BlockContentRegistries#FLATTENABLE FLATTENABLE}
  */
+@Deprecated
 public final class FlattenableBlockRegistry {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlattenableBlockRegistry.class);
 
@@ -44,10 +46,11 @@ public final class FlattenableBlockRegistry {
 	public static void register(Block input, BlockState flattened) {
 		Objects.requireNonNull(input, "input block cannot be null");
 		Objects.requireNonNull(flattened, "flattened block state cannot be null");
-		BlockState old = ShovelItemAccessor.getPathStates().put(input, flattened);
 
-		if (old != null) {
+		org.quiltmc.qsl.block.content.registry.api.BlockContentRegistries.FLATTENABLE.get(input).ifPresent(old -> {
 			LOGGER.debug("Replaced old flattening mapping from {} to {} with {}", input, old, flattened);
-		}
+		});
+
+		org.quiltmc.quilted_fabric_api.impl.content.registry.util.QuiltDeferringQueues.addEntry(org.quiltmc.qsl.block.content.registry.api.BlockContentRegistries.FLATTENABLE, input, flattened);
 	}
 }
