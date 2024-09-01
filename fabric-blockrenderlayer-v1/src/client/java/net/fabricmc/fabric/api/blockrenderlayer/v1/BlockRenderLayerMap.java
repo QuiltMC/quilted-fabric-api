@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +35,10 @@ import net.fabricmc.fabric.impl.blockrenderlayer.BlockRenderLayerMapImpl;
  * via {@code BlendMode}.
  *
  * <p>Client-side only.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.block.extensions.api.client.BlockRenderLayerMap BlockRenderLayerMap}
  */
+@Deprecated
 public interface BlockRenderLayerMap {
 	BlockRenderLayerMap INSTANCE = new BlockRenderLayerMapImpl();
 

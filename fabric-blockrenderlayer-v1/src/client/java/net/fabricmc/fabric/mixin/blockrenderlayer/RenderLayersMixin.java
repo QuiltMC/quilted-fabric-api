@@ -43,6 +43,6 @@ public class RenderLayersMixin {
 
 	@Inject(method = "<clinit>*", at = @At("RETURN"))
 	private static void onInitialize(CallbackInfo info) {
-		BlockRenderLayerMapImpl.initialize(BLOCKS::put, FLUIDS::put);
+		BlockRenderLayerMapImpl.initialize(BLOCKS::put);
 	}
 }
