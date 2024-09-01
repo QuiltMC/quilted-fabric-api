@@ -17,3 +17,7 @@ loom {
 validateMixinNames {
 	exclude "**/ModelPredicateProviderRegistrySpecificAccessor.class"
 }
+
+dependencies {
+	modApi getQslModule("block", "block_entity")
+}

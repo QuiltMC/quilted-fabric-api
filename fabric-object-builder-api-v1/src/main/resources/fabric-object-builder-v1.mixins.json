@@ -6,14 +6,10 @@
     "AbstractBlockAccessor",
     "AbstractBlockSettingsAccessor",
     "BlockEntityTypeBuilderMixin",
-    "BlockEntityTypeMixin",
-    "DefaultAttributeRegistryAccessor",
-    "DefaultAttributeRegistryMixin",
     "DetectorRailBlockMixin",
     "EntityTypeBuilderMixin",
     "EntityTypeMixin",
-    "PersistentStateManagerMixin",
-    "TradeOffersTypeAwareBuyForOneEmeraldFactoryMixin"
+    "PersistentStateManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
