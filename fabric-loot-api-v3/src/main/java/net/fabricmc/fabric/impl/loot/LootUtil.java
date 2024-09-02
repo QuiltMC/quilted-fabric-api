@@ -24,9 +24,9 @@ import net.minecraft.resource.ResourcePackSource;
 import net.minecraft.util.Identifier;
 
 import net.fabricmc.fabric.api.loot.v3.LootTableSource;
-import net.fabricmc.fabric.impl.resource.loader.BuiltinModResourcePackSource;
 import net.fabricmc.fabric.impl.resource.loader.FabricResource;
-import net.fabricmc.fabric.impl.resource.loader.ModResourcePackCreator;
+
+import org.quiltmc.qsl.resource.loader.impl.QuiltBuiltinPackProfile;
 
 public final class LootUtil {
 	public static final ThreadLocal<Map<Identifier, LootTableSource>> SOURCES = ThreadLocal.withInitial(HashMap::new);
@@ -37,7 +37,7 @@ public final class LootUtil {
 
 			if (packSource == ResourcePackSource.BUILTIN) {
 				return LootTableSource.VANILLA;
-			} else if (packSource == ModResourcePackCreator.RESOURCE_PACK_SOURCE || packSource instanceof BuiltinModResourcePackSource) {
+			} else if (packSource instanceof QuiltBuiltinPackProfile.BuiltinPackSource) {
 				return LootTableSource.MOD;
 			}
 		}

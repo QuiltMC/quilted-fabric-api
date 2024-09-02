@@ -22,7 +22,10 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 
 /**
  * Interface implemented by mod-provided resource packs.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.resource.loader.api.QuiltPack QuiltPack}
  */
+@Deprecated
 public interface ModResourcePack extends ResourcePack {
 	/**
 	 * @return The ModMetadata object associated with the mod providing this

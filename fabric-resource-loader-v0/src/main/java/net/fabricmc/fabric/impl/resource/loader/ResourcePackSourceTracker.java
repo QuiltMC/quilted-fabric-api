@@ -40,7 +40,7 @@ public final class ResourcePackSourceTracker {
 	 * @return the source, or {@link ResourcePackSource#NONE} if not tracked
 	 */
 	public static ResourcePackSource getSource(ResourcePack pack) {
-		return SOURCES.getOrDefault(pack, ResourcePackSource.NONE);
+		return SOURCES.getOrDefault(pack, pack.getInfo().source());
 	}
 
 	/**

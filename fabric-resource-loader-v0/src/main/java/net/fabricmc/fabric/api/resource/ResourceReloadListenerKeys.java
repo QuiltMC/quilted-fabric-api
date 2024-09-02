@@ -22,7 +22,10 @@ import net.minecraft.util.Identifier;
  * This class contains default keys for various Minecraft resource reload listeners.
  *
  * @see IdentifiableResourceReloadListener
+ *
+ * @deprecated see {@link org.quiltmc.qsl.resource.loader.api.reloader.ResourceReloaderKeys ResourceReloaderKeys}
  */
+@Deprecated
 public final class ResourceReloadListenerKeys {
 	// client
 	public static final Identifier SOUNDS = Identifier.ofVanilla("sounds");

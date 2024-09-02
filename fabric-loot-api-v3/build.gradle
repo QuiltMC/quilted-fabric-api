@@ -4,3 +4,7 @@ moduleDependencies(project, [
 	'fabric-api-base',
 	'fabric-resource-loader-v0'
 ])
+
+dependencies {
+	modImplementation getQslModule("core", "resource_loader")
+}

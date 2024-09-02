@@ -42,7 +42,10 @@ import net.minecraft.util.profiler.Profiler;
  * {@link IdentifiableResourceReloadListener}.
  *
  * @param <T> The data object.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.resource.loader.api.reloader.SimpleResourceReloader SimpleResourceReloader}
  */
+@Deprecated
 public interface SimpleResourceReloadListener<T> extends IdentifiableResourceReloadListener {
 	@Override
 	default CompletableFuture<Void> reload(ResourceReloader.Synchronizer helper, ResourceManager manager, Profiler loadProfiler, Profiler applyProfiler, Executor loadExecutor, Executor applyExecutor) {

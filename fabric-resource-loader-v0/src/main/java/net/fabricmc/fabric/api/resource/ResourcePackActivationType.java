@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +19,10 @@ package net.fabricmc.fabric.api.resource;
 
 /**
  * Represents the resource pack activation type.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.resource.loader.api.PackActivationType PackActivationType}
  */
+@Deprecated
 public enum ResourcePackActivationType {
 	/**
 	 * Normal activation. The user has full control over the activation of the resource pack.
@@ -40,5 +44,13 @@ public enum ResourcePackActivationType {
 	 */
 	public boolean isEnabledByDefault() {
 		return this == DEFAULT_ENABLED || this == ALWAYS_ENABLED;
+	}
+
+	public org.quiltmc.qsl.resource.loader.api.PackActivationType toQuilt() {
+		return switch (this) {
+		case NORMAL -> org.quiltmc.qsl.resource.loader.api.PackActivationType.NORMAL;
+		case DEFAULT_ENABLED -> org.quiltmc.qsl.resource.loader.api.PackActivationType.DEFAULT_ENABLED;
+		case ALWAYS_ENABLED -> org.quiltmc.qsl.resource.loader.api.PackActivationType.ALWAYS_ENABLED;
+		};
 	}
 }

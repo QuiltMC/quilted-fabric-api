@@ -17,6 +17,8 @@
 
 package net.fabricmc.fabric.api.event.lifecycle.v1;
 
+import java.util.Optional;
+
 import net.minecraft.resource.LifecycledResourceManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerManager;
@@ -104,22 +106,40 @@ public final class ServerLifecycleEvents {
 	/**
 	 * Called before a Minecraft server reloads data packs.
 	 */
-	public static final Event<StartDataPackReload> START_DATA_PACK_RELOAD = EventFactory.createArrayBacked(StartDataPackReload.class, callbacks -> (server, serverResourceManager) -> {
-		for (StartDataPackReload callback : callbacks) {
-			callback.startDataPackReload(server, serverResourceManager);
-		}
-	});
+	public static final Event<StartDataPackReload> START_DATA_PACK_RELOAD = QuiltCompatEvent.fromQuilt(
+			org.quiltmc.qsl.resource.loader.api.ResourceLoaderEvents.START_DATA_PACK_RELOAD,
+			startDataPackReload -> context -> {
+				// Fabric only triggers it at reloads, not startup.
+				if (!context.isFirst()) {
+					startDataPackReload.startDataPackReload(context.server(), (LifecycledResourceManager) context.resourceManager());
+				}
+			},
+			invokerGetter -> (server, resourceManager) -> invokerGetter.get().onStartDataPackReload(new org.quiltmc.qsl.resource.loader.impl.ResourceLoaderEventContextsImpl.ReloadStartContext(
+					() -> resourceManager, null
+			))
+	);
 
 	/**
 	 * Called after a Minecraft server has reloaded data packs.
 	 *
 	 * <p>If reloading data packs was unsuccessful, the current data packs will be kept.
 	 */
-	public static final Event<EndDataPackReload> END_DATA_PACK_RELOAD = EventFactory.createArrayBacked(EndDataPackReload.class, callbacks -> (server, serverResourceManager, success) -> {
-		for (EndDataPackReload callback : callbacks) {
-			callback.endDataPackReload(server, serverResourceManager, success);
-		}
-	});
+	public static final Event<EndDataPackReload> END_DATA_PACK_RELOAD = QuiltCompatEvent.fromQuilt(
+			org.quiltmc.qsl.resource.loader.api.ResourceLoaderEvents.END_DATA_PACK_RELOAD,
+			endDataPackReload -> context -> {
+				// Fabric only triggers it at reloads, not startup.
+				// Also using an actual cast, unlike Fabric.
+				if (!context.isFirst()) {
+					endDataPackReload.endDataPackReload(context.server(), (LifecycledResourceManager) context.resourceManager(), context.error().isEmpty());
+				}
+			},
+			invokerGetter -> (server, resourceManager, success) -> {
+				invokerGetter.get().onEndDataPackReload(new org.quiltmc.qsl.resource.loader.impl.ResourceLoaderEventContextsImpl.ReloadEndContext(
+						resourceManager, server.getRegistryManager(), Optional.ofNullable(
+						success ? null : new RuntimeException("Unknown error")
+				)));
+			}
+	);
 
 	/**
 	 * Called before a Minecraft server begins saving data.

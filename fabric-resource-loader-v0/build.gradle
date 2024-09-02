@@ -9,3 +9,7 @@ testDependencies(project, [
 	':fabric-api-base',
 	':fabric-resource-loader-v0'
 ])
+
+dependencies {
+	modApi getQslModule("core", "resource_loader")
+}

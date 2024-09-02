@@ -27,23 +27,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin {
-	@Shadow
-	private MinecraftServer.ResourceManagerHolder resourceManagerHolder;
-
-	@Inject(method = "reloadResources", at = @At("HEAD"))
-	private void startResourceReload(Collection<String> collection, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-		ServerLifecycleEvents.START_DATA_PACK_RELOAD.invoker().startDataPackReload((MinecraftServer) (Object) this, this.resourceManagerHolder.resourceManager());
-	}
-
-	@Inject(method = "reloadResources", at = @At("TAIL"))
-	private void endResourceReload(Collection<String> collection, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-		cir.getReturnValue().handleAsync((value, throwable) -> {
-			// Hook into fail
-			ServerLifecycleEvents.END_DATA_PACK_RELOAD.invoker().endDataPackReload((MinecraftServer) (Object) this, this.resourceManagerHolder.resourceManager(), throwable == null);
-			return value;
-		}, (MinecraftServer) (Object) this);
-	}
-
 	@Inject(method = "save", at = @At("HEAD"))
 	private void startSave(boolean suppressLogs, boolean flush, boolean force, CallbackInfoReturnable<Boolean> cir) {
 		ServerLifecycleEvents.BEFORE_SAVE.invoker().onBeforeSave((MinecraftServer) (Object) this, flush, force);

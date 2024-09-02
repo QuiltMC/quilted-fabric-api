@@ -30,8 +30,11 @@ import net.minecraft.util.Identifier;
  * themselves.
  *
  * @see ResourceReloadListenerKeys
+ *
+ * @deprecated see {@link org.quiltmc.qsl.resource.loader.api.reloader.IdentifiableResourceReloader IdentifiableResourceReloader}
  */
-public interface IdentifiableResourceReloadListener extends ResourceReloader {
+@Deprecated
+public interface IdentifiableResourceReloadListener extends ResourceReloader, org.quiltmc.qsl.resource.loader.api.reloader.IdentifiableResourceReloader {
 	/**
 	 * @return The unique identifier of this listener.
 	 */
@@ -44,5 +47,10 @@ public interface IdentifiableResourceReloadListener extends ResourceReloader {
 	 */
 	default Collection<Identifier> getFabricDependencies() {
 		return Collections.emptyList();
+	}
+
+	@Override
+	default Identifier getQuiltId() {
+		return this.getFabricId();
 	}
 }
