@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +17,24 @@
 
 package net.fabricmc.fabric.api.networking.v1;
 
-import java.util.Objects;
-
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 
 import net.minecraft.network.PacketByteBuf;
 
 /**
  * Helper methods for working with and creating {@link PacketByteBuf}s.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.networking.api.PacketByteBufs PacketByteBufs}
  */
+@Deprecated
 public final class PacketByteBufs {
-	private static final PacketByteBuf EMPTY_PACKET_BYTE_BUF = new PacketByteBuf(Unpooled.EMPTY_BUFFER);
-
 	/**
 	 * Returns an empty instance of packet byte buf.
 	 *
 	 * @return an empty buf
 	 */
 	public static PacketByteBuf empty() {
-		return EMPTY_PACKET_BYTE_BUF;
+		return org.quiltmc.qsl.networking.api.PacketByteBufs.empty();
 	}
 
 	/**
@@ -44,7 +43,7 @@ public final class PacketByteBufs {
 	 * @return a new buf
 	 */
 	public static PacketByteBuf create() {
-		return new PacketByteBuf(Unpooled.buffer());
+		return org.quiltmc.qsl.networking.api.PacketByteBufs.create();
 	}
 
 	// Convenience methods for byte buf methods that return a new byte buf
@@ -58,9 +57,7 @@ public final class PacketByteBufs {
 	 * @see ByteBuf#readBytes(int)
 	 */
 	public static PacketByteBuf readBytes(ByteBuf buf, int length) {
-		Objects.requireNonNull(buf, "ByteBuf cannot be null");
-
-		return new PacketByteBuf(buf.readBytes(length));
+		return org.quiltmc.qsl.networking.api.PacketByteBufs.readBytes(buf, length);
 	}
 
 	/**
@@ -72,9 +69,7 @@ public final class PacketByteBufs {
 	 * @see ByteBuf#readSlice(int)
 	 */
 	public static PacketByteBuf readSlice(ByteBuf buf, int length) {
-		Objects.requireNonNull(buf, "ByteBuf cannot be null");
-
-		return new PacketByteBuf(buf.readSlice(length));
+		return org.quiltmc.qsl.networking.api.PacketByteBufs.readSlice(buf, length);
 	}
 
 	/**
@@ -86,9 +81,7 @@ public final class PacketByteBufs {
 	 * @see ByteBuf#readRetainedSlice(int)
 	 */
 	public static PacketByteBuf readRetainedSlice(ByteBuf buf, int length) {
-		Objects.requireNonNull(buf, "ByteBuf cannot be null");
-
-		return new PacketByteBuf(buf.readRetainedSlice(length));
+		return org.quiltmc.qsl.networking.api.PacketByteBufs.readRetainedSlice(buf, length);
 	}
 
 	/**
@@ -99,9 +92,7 @@ public final class PacketByteBufs {
 	 * @see ByteBuf#copy()
 	 */
 	public static PacketByteBuf copy(ByteBuf buf) {
-		Objects.requireNonNull(buf, "ByteBuf cannot be null");
-
-		return new PacketByteBuf(buf.copy());
+		return org.quiltmc.qsl.networking.api.PacketByteBufs.copy(buf);
 	}
 
 	/**
@@ -114,9 +105,7 @@ public final class PacketByteBufs {
 	 * @see ByteBuf#copy(int, int)
 	 */
 	public static PacketByteBuf copy(ByteBuf buf, int index, int length) {
-		Objects.requireNonNull(buf, "ByteBuf cannot be null");
-
-		return new PacketByteBuf(buf.copy(index, length));
+		return org.quiltmc.qsl.networking.api.PacketByteBufs.copy(buf, index, length);
 	}
 
 	/**
@@ -127,9 +116,7 @@ public final class PacketByteBufs {
 	 * @see ByteBuf#slice()
 	 */
 	public static PacketByteBuf slice(ByteBuf buf) {
-		Objects.requireNonNull(buf, "ByteBuf cannot be null");
-
-		return new PacketByteBuf(buf.slice());
+		return org.quiltmc.qsl.networking.api.PacketByteBufs.slice(buf);
 	}
 
 	/**
@@ -140,9 +127,7 @@ public final class PacketByteBufs {
 	 * @see ByteBuf#retainedSlice()
 	 */
 	public static PacketByteBuf retainedSlice(ByteBuf buf) {
-		Objects.requireNonNull(buf, "ByteBuf cannot be null");
-
-		return new PacketByteBuf(buf.retainedSlice());
+		return org.quiltmc.qsl.networking.api.PacketByteBufs.retainedSlice(buf);
 	}
 
 	/**
@@ -155,9 +140,7 @@ public final class PacketByteBufs {
 	 * @see ByteBuf#slice(int, int)
 	 */
 	public static PacketByteBuf slice(ByteBuf buf, int index, int length) {
-		Objects.requireNonNull(buf, "ByteBuf cannot be null");
-
-		return new PacketByteBuf(buf.slice(index, length));
+		return org.quiltmc.qsl.networking.api.PacketByteBufs.slice(buf, index, length);
 	}
 
 	/**
@@ -170,9 +153,7 @@ public final class PacketByteBufs {
 	 * @see ByteBuf#retainedSlice(int, int)
 	 */
 	public static PacketByteBuf retainedSlice(ByteBuf buf, int index, int length) {
-		Objects.requireNonNull(buf, "ByteBuf cannot be null");
-
-		return new PacketByteBuf(buf.retainedSlice(index, length));
+		return org.quiltmc.qsl.networking.api.PacketByteBufs.retainedSlice(buf, index, length);
 	}
 
 	/**
@@ -183,9 +164,7 @@ public final class PacketByteBufs {
 	 * @see ByteBuf#duplicate()
 	 */
 	public static PacketByteBuf duplicate(ByteBuf buf) {
-		Objects.requireNonNull(buf, "ByteBuf cannot be null");
-
-		return new PacketByteBuf(buf.duplicate());
+		return org.quiltmc.qsl.networking.api.PacketByteBufs.duplicate(buf);
 	}
 
 	/**
@@ -196,9 +175,7 @@ public final class PacketByteBufs {
 	 * @see ByteBuf#retainedDuplicate()
 	 */
 	public static PacketByteBuf retainedDuplicate(ByteBuf buf) {
-		Objects.requireNonNull(buf, "ByteBuf cannot be null");
-
-		return new PacketByteBuf(buf.retainedDuplicate());
+		return org.quiltmc.qsl.networking.api.PacketByteBufs.retainedDuplicate(buf);
 	}
 
 	private PacketByteBufs() {

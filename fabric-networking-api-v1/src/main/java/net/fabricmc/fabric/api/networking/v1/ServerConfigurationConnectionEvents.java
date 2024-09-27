@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2024 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +21,14 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerConfigurationNetworkHandler;
 
 import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.EventFactory;
+import net.fabricmc.fabric.impl.base.event.QuiltCompatEvent;
 
 /**
  * Offers access to events related to the connection to a client on a logical server while a client is configuring.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.networking.api.server.ServerConfigurationConnectionEvents ServerConfigurationConnectionEvents}
  */
+@Deprecated
 public final class ServerConfigurationConnectionEvents {
 	/**
 	 * Event fired before any vanilla configuration has taken place.
@@ -33,11 +37,11 @@ public final class ServerConfigurationConnectionEvents {
 	 *
 	 * <p>Task queued during this event will complete before vanilla configuration starts.
 	 */
-	public static final Event<Configure> BEFORE_CONFIGURE = EventFactory.createArrayBacked(Configure.class, callbacks -> (handler, server) -> {
-		for (Configure callback : callbacks) {
-			callback.onSendConfiguration(handler, server);
-		}
-	});
+	public static final Event<Configure> BEFORE_CONFIGURE = QuiltCompatEvent.fromQuilt(
+			org.quiltmc.qsl.networking.api.server.ServerConfigurationConnectionEvents.INIT,
+			configure -> configure::onSendConfiguration,
+			invokerGetter -> invokerGetter.get()::onConfigurationInit
+	);
 
 	/**
 	 * Event fired during vanilla configuration.
@@ -56,22 +60,22 @@ public final class ServerConfigurationConnectionEvents {
 	 * });
 	 * }</pre>
 	 */
-	public static final Event<Configure> CONFIGURE = EventFactory.createArrayBacked(Configure.class, callbacks -> (handler, server) -> {
-		for (Configure callback : callbacks) {
-			callback.onSendConfiguration(handler, server);
-		}
-	});
+	public static final Event<Configure> CONFIGURE = QuiltCompatEvent.fromQuilt(
+			org.quiltmc.qsl.networking.api.server.ServerConfigurationConnectionEvents.ADD_TASKS,
+			configure -> configure::onSendConfiguration,
+			invokerGetter -> invokerGetter.get()::onAddTasks
+	);
 
 	/**
 	 * An event for the disconnection of the server configuration network handler.
 	 *
 	 * <p>No packets should be sent when this event is invoked.
 	 */
-	public static final Event<ServerConfigurationConnectionEvents.Disconnect> DISCONNECT = EventFactory.createArrayBacked(ServerConfigurationConnectionEvents.Disconnect.class, callbacks -> (handler, server) -> {
-		for (ServerConfigurationConnectionEvents.Disconnect callback : callbacks) {
-			callback.onConfigureDisconnect(handler, server);
-		}
-	});
+	public static final Event<ServerConfigurationConnectionEvents.Disconnect> DISCONNECT = QuiltCompatEvent.fromQuilt(
+			org.quiltmc.qsl.networking.api.server.ServerConfigurationConnectionEvents.DISCONNECT,
+			configure -> configure::onConfigureDisconnect,
+			invokerGetter -> invokerGetter.get()::onConfigurationDisconnect
+	);
 
 	private ServerConfigurationConnectionEvents() {
 	}

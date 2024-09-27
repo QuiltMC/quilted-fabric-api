@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2024 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +47,9 @@
  * <p>In addition, this API includes helpers for {@linkplain
  * net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry registering custom packet payloads} and {@linkplain
  * net.fabricmc.fabric.api.networking.v1.PlayerLookup player lookups}.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.networking.api} and {@link org.quiltmc.qsl.networking.api.server}
  */
 
+@Deprecated
 package net.fabricmc.fabric.api.networking.v1;

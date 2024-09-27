@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2024 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +24,11 @@ import net.minecraft.util.Identifier;
 /**
  * Fabric-provided extensions for {@link ServerConfigurationNetworkHandler}.
  * This interface is automatically implemented via Mixin and interface injection.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.networking.api.server.ServerConfigurationTaskManager}
  */
-public interface FabricServerConfigurationNetworkHandler {
+@Deprecated
+public interface FabricServerConfigurationNetworkHandler extends org.quiltmc.qsl.networking.api.server.ServerConfigurationTaskManager {
 	/**
 	 * Enqueues a {@link ServerPlayerConfigurationTask} task to be processed.
 	 *

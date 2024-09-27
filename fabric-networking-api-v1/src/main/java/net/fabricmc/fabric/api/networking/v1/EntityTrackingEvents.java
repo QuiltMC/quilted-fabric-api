@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,33 +21,34 @@ import net.minecraft.entity.Entity;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.EventFactory;
+import net.fabricmc.fabric.impl.base.event.QuiltCompatEvent;
 
 /**
  * Events related to a tracking entities within a player's view distance.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.networking.api.EntityTrackingEvents EntityTrackingEvents}
  */
+@Deprecated
 public final class EntityTrackingEvents {
 	/**
 	 * An event that is called before player starts tracking an entity.
 	 * Typically, this occurs when an entity enters a client's view distance.
 	 * This event is called before the player's client is sent the entity's {@link Entity#createSpawnPacket() spawn packet}.
 	 */
-	public static final Event<StartTracking> START_TRACKING = EventFactory.createArrayBacked(StartTracking.class, callbacks -> (trackedEntity, player) -> {
-		for (StartTracking callback : callbacks) {
-			callback.onStartTracking(trackedEntity, player);
-		}
-	});
+	public static final Event<StartTracking> START_TRACKING = QuiltCompatEvent.fromQuilt(org.quiltmc.qsl.networking.api.EntityTrackingEvents.BEFORE_START_TRACKING,
+			startTracking -> startTracking::onStartTracking,
+			invokerGetter -> invokerGetter.get()::beforeStartTracking
+	);
 
 	/**
 	 * An event that is called after a player has stopped tracking an entity.
 	 * The client at this point was sent a packet to {@link net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket destroy} the entity on the client.
 	 * The entity still exists on the server.
 	 */
-	public static final Event<StopTracking> STOP_TRACKING = EventFactory.createArrayBacked(StopTracking.class, callbacks -> (trackedEntity, player) -> {
-		for (StopTracking callback : callbacks) {
-			callback.onStopTracking(trackedEntity, player);
-		}
-	});
+	public static final Event<StopTracking> STOP_TRACKING = QuiltCompatEvent.fromQuilt(org.quiltmc.qsl.networking.api.EntityTrackingEvents.STOP_TRACKING,
+			stopTracking -> stopTracking::onStopTracking,
+			invokerGetter -> invokerGetter.get()::onStopTracking
+	);
 
 	@FunctionalInterface
 	public interface StartTracking {

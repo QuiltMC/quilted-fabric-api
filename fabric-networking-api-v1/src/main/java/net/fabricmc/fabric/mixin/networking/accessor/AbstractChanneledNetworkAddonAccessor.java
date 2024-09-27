@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2024 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,17 @@
  * limitations under the License.
  */
 
-package net.fabricmc.fabric.mixin.networking.client.accessor;
+package net.fabricmc.fabric.mixin.networking.accessor;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import net.minecraft.client.network.ClientLoginNetworkHandler;
 import net.minecraft.network.ClientConnection;
 
-@Mixin(ClientLoginNetworkHandler.class)
-public interface ClientLoginNetworkHandlerAccessor {
+import org.quiltmc.qsl.networking.impl.AbstractChanneledNetworkAddon;
+
+@Mixin(AbstractChanneledNetworkAddon.class)
+public interface AbstractChanneledNetworkAddonAccessor {
 	@Accessor
 	ClientConnection getConnection();
 }

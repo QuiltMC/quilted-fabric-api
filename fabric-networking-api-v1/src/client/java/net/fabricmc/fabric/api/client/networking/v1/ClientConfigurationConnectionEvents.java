@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2024 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +23,17 @@ import net.minecraft.network.packet.CustomPayload;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
+import net.fabricmc.fabric.impl.base.event.QuiltCompatEvent;
+
+import org.quiltmc.qsl.networking.impl.AbstractChanneledNetworkAddon;
+import org.quiltmc.qsl.networking.impl.NetworkHandlerExtensions;
 
 /**
  * Offers access to events related to the configuration connection to a server on a logical client.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.networking.api.client.ClientConfigurationConnectionEvents ClientConfigurationConnectionEvents}
  */
+@Deprecated
 public final class ClientConfigurationConnectionEvents {
 	/**
 	 * Event indicating a connection entering the CONFIGURATION state, ready for registering channel handlers.
@@ -33,45 +41,53 @@ public final class ClientConfigurationConnectionEvents {
 	 * <p>No packets should be sent when this event is invoked.
 	 *
 	 * @see ClientConfigurationNetworking#registerReceiver(CustomPayload.Id, ClientConfigurationNetworking.ConfigurationPayloadHandler)
+	 *
+	 * @deprecated see {@link org.quiltmc.qsl.networking.api.client.ClientConfigurationConnectionEvents#INIT INIT}
 	 */
-	public static final Event<ClientConfigurationConnectionEvents.Init> INIT = EventFactory.createArrayBacked(ClientConfigurationConnectionEvents.Init.class, callbacks -> (handler, client) -> {
-		for (ClientConfigurationConnectionEvents.Init callback : callbacks) {
-			callback.onConfigurationInit(handler, client);
-		}
-	});
+	@Deprecated
+	public static final Event<ClientConfigurationConnectionEvents.Init> INIT = QuiltCompatEvent.fromQuilt(org.quiltmc.qsl.networking.api.client.ClientConfigurationConnectionEvents.INIT,
+			init -> init::onConfigurationInit,
+			invokerGetter -> invokerGetter.get()::onConfigurationInit
+	);
 
 	/**
 	 * An event called after the connection has been initialized and is ready to start sending and receiving configuration packets.
 	 *
 	 * <p>Packets may be sent during this event.
+	 *
+	 * @deprecated see {@link org.quiltmc.qsl.networking.api.client.ClientConfigurationConnectionEvents#START START}
 	 */
-	public static final Event<ClientConfigurationConnectionEvents.Start> START = EventFactory.createArrayBacked(ClientConfigurationConnectionEvents.Start.class, callbacks -> (handler, client) -> {
-		for (ClientConfigurationConnectionEvents.Start callback : callbacks) {
-			callback.onConfigurationStart(handler, client);
-		}
-	});
+	@Deprecated
+	public static final Event<ClientConfigurationConnectionEvents.Start> START = QuiltCompatEvent.fromQuilt(org.quiltmc.qsl.networking.api.client.ClientConfigurationConnectionEvents.START,
+			init -> (handler, sender, client) -> init.onConfigurationStart(handler, client),
+			invokerGetter -> (handler, client) -> invokerGetter.get().onConfigurationStart(handler, ((AbstractChanneledNetworkAddon<?>) ((NetworkHandlerExtensions) handler).getAddon()), client)
+	);
 
 	/**
 	 * An event called after the ReadyS2CPacket has been received, just before switching to the PLAY state.
 	 *
 	 * <p>No packets should be sent when this event is invoked.
+	 *
+	 * @deprecated see {@link org.quiltmc.qsl.networking.api.client.ClientConfigurationConnectionEvents#CONFIGURED CONFIGURED}
 	 */
-	public static final Event<ClientConfigurationConnectionEvents.Complete> COMPLETE = EventFactory.createArrayBacked(ClientConfigurationConnectionEvents.Complete.class, callbacks -> (handler, client) -> {
-		for (ClientConfigurationConnectionEvents.Complete callback : callbacks) {
-			callback.onConfigurationComplete(handler, client);
-		}
-	});
+	@Deprecated
+	public static final Event<ClientConfigurationConnectionEvents.Complete> COMPLETE = QuiltCompatEvent.fromQuilt(org.quiltmc.qsl.networking.api.client.ClientConfigurationConnectionEvents.CONFIGURED,
+			init -> init::onConfigurationComplete,
+			invokerGetter -> invokerGetter.get()::onConfigured
+	);
 
 	/**
 	 * An event for the disconnection of the client configuration network handler.
 	 *
 	 * <p>No packets should be sent when this event is invoked.
+	 *
+	 * @deprecated see {@link org.quiltmc.qsl.networking.api.client.ClientConfigurationConnectionEvents#DISCONNECT DISCONNECT}
 	 */
-	public static final Event<ClientConfigurationConnectionEvents.Disconnect> DISCONNECT = EventFactory.createArrayBacked(ClientConfigurationConnectionEvents.Disconnect.class, callbacks -> (handler, client) -> {
-		for (ClientConfigurationConnectionEvents.Disconnect callback : callbacks) {
-			callback.onConfigurationDisconnect(handler, client);
-		}
-	});
+	@Deprecated
+	public static final Event<ClientConfigurationConnectionEvents.Disconnect> DISCONNECT = QuiltCompatEvent.fromQuilt(org.quiltmc.qsl.networking.api.client.ClientConfigurationConnectionEvents.DISCONNECT,
+			init -> init::onConfigurationDisconnect,
+			invokerGetter -> invokerGetter.get()::onConfigurationDisconnect
+	);
 
 	private ClientConfigurationConnectionEvents() {
 	}

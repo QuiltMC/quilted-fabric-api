@@ -3,15 +3,8 @@
   "package": "net.fabricmc.fabric.mixin.networking.client",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "accessor.ClientCommonNetworkHandlerAccessor",
-    "accessor.ClientConfigurationNetworkHandlerAccessor",
-    "accessor.ClientLoginNetworkHandlerAccessor",
-    "accessor.ConnectScreenAccessor",
-    "accessor.MinecraftClientAccessor",
-    "ClientCommonNetworkHandlerMixin",
-    "ClientConfigurationNetworkHandlerMixin",
-    "ClientLoginNetworkHandlerMixin",
-    "ClientPlayNetworkHandlerMixin"
+    "accessor.ClientConfigurationNetworkAddonAccessor",
+    "accessor.ClientPlayNetworkAddonAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

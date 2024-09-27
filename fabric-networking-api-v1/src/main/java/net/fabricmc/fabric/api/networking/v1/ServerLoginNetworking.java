@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +17,6 @@
 
 package net.fabricmc.fabric.api.networking.v1;
 
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Future;
 
@@ -28,8 +28,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerLoginNetworkHandler;
 import net.minecraft.util.Identifier;
 
-import net.fabricmc.fabric.impl.networking.server.ServerNetworkingImpl;
-import net.fabricmc.fabric.mixin.networking.accessor.ServerLoginNetworkHandlerAccessor;
+import net.fabricmc.fabric.impl.networking.QuiltUtil;
 
 /**
  * Offers access to login stage server-side networking functionalities.
@@ -38,7 +37,10 @@ import net.fabricmc.fabric.mixin.networking.accessor.ServerLoginNetworkHandlerAc
  *
  * @see ServerPlayNetworking
  * @see ServerConfigurationNetworking
+ *
+ * @deprecated see {@link org.quiltmc.qsl.networking.api.server.ServerLoginNetworking ServerLoginNetworking}
  */
+@Deprecated
 public final class ServerLoginNetworking {
 	/**
 	 * Registers a handler to a query response channel.
@@ -54,7 +56,7 @@ public final class ServerLoginNetworking {
 	 * @see ServerLoginNetworking#registerReceiver(ServerLoginNetworkHandler, Identifier, LoginQueryResponseHandler)
 	 */
 	public static boolean registerGlobalReceiver(Identifier channelName, LoginQueryResponseHandler channelHandler) {
-		return ServerNetworkingImpl.LOGIN.registerGlobalReceiver(channelName, channelHandler);
+		return org.quiltmc.qsl.networking.api.server.ServerLoginNetworking.registerGlobalReceiver(channelName, channelHandler);
 	}
 
 	/**
@@ -70,7 +72,9 @@ public final class ServerLoginNetworking {
 	 */
 	@Nullable
 	public static ServerLoginNetworking.LoginQueryResponseHandler unregisterGlobalReceiver(Identifier channelName) {
-		return ServerNetworkingImpl.LOGIN.unregisterGlobalReceiver(channelName);
+		org.quiltmc.qsl.networking.api.server.ServerLoginNetworking.QueryResponseReceiver old = org.quiltmc.qsl.networking.api.server.ServerLoginNetworking.unregisterGlobalReceiver(channelName);
+
+		return convertToFabricHandler(old);
 	}
 
 	/**
@@ -80,7 +84,7 @@ public final class ServerLoginNetworking {
 	 * @return all channel names which global receivers are registered for.
 	 */
 	public static Set<Identifier> getGlobalReceivers() {
-		return ServerNetworkingImpl.LOGIN.getChannels();
+		return org.quiltmc.qsl.networking.api.server.ServerLoginNetworking.getGlobalReceivers();
 	}
 
 	/**
@@ -95,9 +99,7 @@ public final class ServerLoginNetworking {
 	 * @return false if a handler is already registered to the channel name
 	 */
 	public static boolean registerReceiver(ServerLoginNetworkHandler networkHandler, Identifier channelName, LoginQueryResponseHandler responseHandler) {
-		Objects.requireNonNull(networkHandler, "Network handler cannot be null");
-
-		return ServerNetworkingImpl.getAddon(networkHandler).registerChannel(channelName, responseHandler);
+		return org.quiltmc.qsl.networking.api.server.ServerLoginNetworking.registerReceiver(networkHandler, channelName, responseHandler);
 	}
 
 	/**
@@ -110,9 +112,9 @@ public final class ServerLoginNetworking {
 	 */
 	@Nullable
 	public static ServerLoginNetworking.LoginQueryResponseHandler unregisterReceiver(ServerLoginNetworkHandler networkHandler, Identifier channelName) {
-		Objects.requireNonNull(networkHandler, "Network handler cannot be null");
+		org.quiltmc.qsl.networking.api.server.ServerLoginNetworking.QueryResponseReceiver old = org.quiltmc.qsl.networking.api.server.ServerLoginNetworking.unregisterReceiver(networkHandler, channelName);
 
-		return ServerNetworkingImpl.getAddon(networkHandler).unregisterChannel(channelName);
+		return convertToFabricHandler(old);
 	}
 
 	// Helper methods
@@ -123,16 +125,14 @@ public final class ServerLoginNetworking {
 	 * @param handler the server login network handler
 	 */
 	public static MinecraftServer getServer(ServerLoginNetworkHandler handler) {
-		Objects.requireNonNull(handler, "Network handler cannot be null");
-
-		return ((ServerLoginNetworkHandlerAccessor) handler).getServer();
+		return org.quiltmc.qsl.networking.api.server.ServerLoginNetworking.getServer(handler);
 	}
 
 	private ServerLoginNetworking() {
 	}
 
 	@FunctionalInterface
-	public interface LoginQueryResponseHandler {
+	public interface LoginQueryResponseHandler extends org.quiltmc.qsl.networking.api.server.ServerLoginNetworking.QueryResponseReceiver {
 		/**
 		 * Handles an incoming query response from a client.
 		 *
@@ -148,6 +148,11 @@ public final class ServerLoginNetworking {
 		 * @param responseSender the packet sender
 		 */
 		void receive(MinecraftServer server, ServerLoginNetworkHandler handler, boolean understood, PacketByteBuf buf, LoginSynchronizer synchronizer, PacketSender responseSender);
+
+		@Override
+		default void receive(MinecraftServer server, ServerLoginNetworkHandler handler, boolean understood, PacketByteBuf buf, org.quiltmc.qsl.networking.api.server.ServerLoginNetworking.LoginSynchronizer synchronizer, org.quiltmc.qsl.networking.api.LoginPacketSender responseSender) {
+			this.receive(server, handler, understood, buf, synchronizer::waitFor, QuiltUtil.toFabricSender(responseSender));
+		}
 	}
 
 	/**
@@ -155,7 +160,7 @@ public final class ServerLoginNetworking {
 	 */
 	@FunctionalInterface
 	@ApiStatus.NonExtendable
-	public interface LoginSynchronizer {
+	public interface LoginSynchronizer extends org.quiltmc.qsl.networking.api.server.ServerLoginNetworking.LoginSynchronizer {
 		/**
 		 * Allows blocking client log-in until the {@code future} is {@link Future#isDone() done}.
 		 *
@@ -193,5 +198,15 @@ public final class ServerLoginNetworking {
 		 * @param future the future that must be done before the player can log in
 		 */
 		void waitFor(Future<?> future);
+	}
+
+	private static @Nullable ServerLoginNetworking.LoginQueryResponseHandler convertToFabricHandler(org.quiltmc.qsl.networking.api.server.ServerLoginNetworking.QueryResponseReceiver old) {
+		if (old instanceof LoginQueryResponseHandler fabric) {
+			return fabric;
+		} else if (old != null) {
+			return (server, handler, understood, buf, sync, sender) -> old.receive(server, handler, understood, buf, sync, QuiltUtil.toQuiltLoginSender(sender));
+		} else {
+			return null;
+		}
 	}
 }

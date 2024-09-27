@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2024 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-package net.fabricmc.fabric.impl.networking;
+package net.fabricmc.fabric.mixin.networking.accessor;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public interface CustomPayloadTypeProvider<B extends PacketByteBuf> {
-	CustomPayload.Type<B, ? extends CustomPayload> get(B packetByteBuf, Identifier identifier);
+import net.minecraft.network.ClientConnection;
+
+import org.quiltmc.qsl.networking.impl.server.ServerLoginNetworkAddon;
+
+@Mixin(ServerLoginNetworkAddon.class)
+public interface ServerLoginNetworkAddonAccessor {
+	@Accessor
+	ClientConnection getConnection();
 }

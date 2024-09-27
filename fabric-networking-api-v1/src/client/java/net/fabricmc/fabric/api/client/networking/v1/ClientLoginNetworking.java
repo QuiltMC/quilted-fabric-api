@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +25,11 @@ import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientLoginNetworkHandler;
-import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.PacketCallbacks;
-import net.minecraft.network.listener.PacketListener;
 import net.minecraft.util.Identifier;
 
 import net.fabricmc.fabric.api.networking.v1.ServerLoginNetworking;
-import net.fabricmc.fabric.impl.networking.client.ClientNetworkingImpl;
 
 /**
  * Offers access to login stage client-side networking functionalities.
@@ -40,7 +38,10 @@ import net.fabricmc.fabric.impl.networking.client.ClientNetworkingImpl;
  *
  * @see ClientPlayNetworking
  * @see ServerLoginNetworking
+ *
+ * @deprecated see {@link org.quiltmc.qsl.networking.api.client.ClientLoginNetworking ClientLoginNetworking}
  */
+@Deprecated
 public final class ClientLoginNetworking {
 	/**
 	 * Registers a handler to a query request channel.
@@ -56,7 +57,7 @@ public final class ClientLoginNetworking {
 	 * @see ClientLoginNetworking#registerReceiver(Identifier, LoginQueryRequestHandler)
 	 */
 	public static boolean registerGlobalReceiver(Identifier channelName, LoginQueryRequestHandler queryHandler) {
-		return ClientNetworkingImpl.LOGIN.registerGlobalReceiver(channelName, queryHandler);
+		return org.quiltmc.qsl.networking.api.client.ClientLoginNetworking.registerGlobalReceiver(channelName, queryHandler);
 	}
 
 	/**
@@ -72,7 +73,15 @@ public final class ClientLoginNetworking {
 	 */
 	@Nullable
 	public static ClientLoginNetworking.LoginQueryRequestHandler unregisterGlobalReceiver(Identifier channelName) {
-		return ClientNetworkingImpl.LOGIN.unregisterGlobalReceiver(channelName);
+		org.quiltmc.qsl.networking.api.client.ClientLoginNetworking.QueryRequestReceiver old = org.quiltmc.qsl.networking.api.client.ClientLoginNetworking.unregisterGlobalReceiver(channelName);
+
+		if (old instanceof LoginQueryRequestHandler fabric) {
+			return fabric;
+		} else if (old != null) {
+			return old::receive;
+		} else {
+			return null;
+		}
 	}
 
 	/**
@@ -82,7 +91,7 @@ public final class ClientLoginNetworking {
 	 * @return all channel names which global receivers are registered for.
 	 */
 	public static Set<Identifier> getGlobalReceivers() {
-		return ClientNetworkingImpl.LOGIN.getChannels();
+		return org.quiltmc.qsl.networking.api.client.ClientLoginNetworking.getGlobalReceivers();
 	}
 
 	/**
@@ -97,17 +106,7 @@ public final class ClientLoginNetworking {
 	 * @throws IllegalStateException if the client is not logging in
 	 */
 	public static boolean registerReceiver(Identifier channelName, LoginQueryRequestHandler queryHandler) throws IllegalStateException {
-		final ClientConnection connection = ClientNetworkingImpl.getLoginConnection();
-
-		if (connection != null) {
-			final PacketListener packetListener = connection.getPacketListener();
-
-			if (packetListener instanceof ClientLoginNetworkHandler) {
-				return ClientNetworkingImpl.getAddon(((ClientLoginNetworkHandler) packetListener)).registerChannel(channelName, queryHandler);
-			}
-		}
-
-		throw new IllegalStateException("Cannot register receiver while client is not logging in!");
+		return org.quiltmc.qsl.networking.api.client.ClientLoginNetworking.registerReceiver(channelName, queryHandler);
 	}
 
 	/**
@@ -121,24 +120,22 @@ public final class ClientLoginNetworking {
 	 */
 	@Nullable
 	public static LoginQueryRequestHandler unregisterReceiver(Identifier channelName) throws IllegalStateException {
-		final ClientConnection connection = ClientNetworkingImpl.getLoginConnection();
+		org.quiltmc.qsl.networking.api.client.ClientLoginNetworking.QueryRequestReceiver old = org.quiltmc.qsl.networking.api.client.ClientLoginNetworking.unregisterReceiver(channelName);
 
-		if (connection != null) {
-			final PacketListener packetListener = connection.getPacketListener();
-
-			if (packetListener instanceof ClientLoginNetworkHandler) {
-				return ClientNetworkingImpl.getAddon(((ClientLoginNetworkHandler) packetListener)).unregisterChannel(channelName);
-			}
+		if (old instanceof LoginQueryRequestHandler fabric) {
+			return fabric;
+		} else if (old != null) {
+			return old::receive;
+		} else {
+			return null;
 		}
-
-		throw new IllegalStateException("Cannot unregister receiver while client is not logging in!");
 	}
 
 	private ClientLoginNetworking() {
 	}
 
 	@FunctionalInterface
-	public interface LoginQueryRequestHandler {
+	public interface LoginQueryRequestHandler extends org.quiltmc.qsl.networking.api.client.ClientLoginNetworking.QueryRequestReceiver {
 		/**
 		 * Handles an incoming query request from a server.
 		 *

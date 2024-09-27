@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2024 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package net.fabricmc.fabric.impl.networking.payload;
+package net.fabricmc.fabric.mixin.networking.client.accessor;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.c2s.login.LoginQueryResponsePayload;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-public record PacketByteBufLoginQueryResponse(PacketByteBuf data) implements LoginQueryResponsePayload {
-	@Override
-	public void write(PacketByteBuf buf) {
-		PayloadHelper.write(buf, data());
-	}
+import net.minecraft.client.network.ClientConfigurationNetworkHandler;
+
+import org.quiltmc.qsl.networking.impl.client.ClientConfigurationNetworkAddon;
+
+@Mixin(ClientConfigurationNetworkAddon.class)
+public interface ClientConfigurationNetworkAddonAccessor {
+	@Accessor
+	ClientConfigurationNetworkHandler getHandler();
 }

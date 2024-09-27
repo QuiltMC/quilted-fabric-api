@@ -30,8 +30,9 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerConfigurationConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
-import net.fabricmc.fabric.mixin.networking.accessor.ServerCommonNetworkHandlerAccessor;
 import net.fabricmc.fabric.mixin.recipe.ingredient.EncoderHandlerMixin;
+
+import org.quiltmc.qsl.networking.mixin.accessor.AbstractServerPacketHandlerAccessor;
 
 /**
  * To reasonably support server-side only custom ingredients, we only send custom ingredients to clients that support them.
@@ -90,7 +91,7 @@ public class CustomIngredientSync implements ModInitializer {
 
 		ServerConfigurationNetworking.registerGlobalReceiver(CustomIngredientPayloadC2S.ID, (payload, context) -> {
 			Set<Identifier> supportedCustomIngredients = decodeResponsePayload(payload);
-			ChannelHandler packetEncoder = ((ServerCommonNetworkHandlerAccessor) context.networkHandler()).getConnection().channel.pipeline().get("encoder");
+			ChannelHandler packetEncoder = ((AbstractServerPacketHandlerAccessor) context.networkHandler()).getConnection().channel.pipeline().get("encoder");
 
 			if (packetEncoder != null) { // Null in singleplayer
 				((SupportedIngredientsPacketEncoder) packetEncoder).fabric_setSupportedCustomIngredients(supportedCustomIngredients);

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2024 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +17,6 @@
 
 package net.fabricmc.fabric.api.client.networking.v1;
 
-import java.util.Objects;
 import java.util.Set;
 
 import org.jetbrains.annotations.ApiStatus;
@@ -32,8 +32,10 @@ import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.fabric.impl.networking.client.ClientConfigurationNetworkAddon;
-import net.fabricmc.fabric.impl.networking.client.ClientNetworkingImpl;
+import net.fabricmc.fabric.impl.networking.QuiltUtil;
+import net.fabricmc.fabric.mixin.networking.client.accessor.ClientConfigurationNetworkAddonAccessor;
+
+import org.quiltmc.qsl.networking.impl.client.ClientConfigurationNetworkAddon;
 
 /**
  * Offers access to configuration stage client-side networking functionalities.
@@ -52,7 +54,10 @@ import net.fabricmc.fabric.impl.networking.client.ClientNetworkingImpl;
  * object-based API.
  *
  * @see ServerConfigurationNetworking
+ *
+ * @deprecated see {@link org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking ClientConfigurationNetworking}
  */
+@Deprecated
 public final class ClientConfigurationNetworking {
 	/**
 	 * Registers a handler for a packet type.
@@ -69,7 +74,7 @@ public final class ClientConfigurationNetworking {
 	 * @see ClientConfigurationNetworking#registerReceiver(CustomPayload.Id, ConfigurationPayloadHandler)
 	 */
 	public static <T extends CustomPayload> boolean registerGlobalReceiver(CustomPayload.Id<T> type, ConfigurationPayloadHandler<T> handler) {
-		return ClientNetworkingImpl.CONFIGURATION.registerGlobalReceiver(type.id(), handler);
+		return org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.registerGlobalReceiver(type, handler);
 	}
 
 	/**
@@ -86,7 +91,9 @@ public final class ClientConfigurationNetworking {
 	 */
 	@Nullable
 	public static ClientConfigurationNetworking.ConfigurationPayloadHandler<?> unregisterGlobalReceiver(CustomPayload.Id<?> id) {
-		return ClientNetworkingImpl.CONFIGURATION.unregisterGlobalReceiver(id.id());
+		org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.CustomChannelReceiver<?> old = org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.unregisterGlobalReceiver(id);
+
+		return convertToFabricHandler(old);
 	}
 
 	/**
@@ -96,7 +103,7 @@ public final class ClientConfigurationNetworking {
 	 * @return all channel names which global receivers are registered for.
 	 */
 	public static Set<Identifier> getGlobalReceivers() {
-		return ClientNetworkingImpl.CONFIGURATION.getChannels();
+		return QuiltUtil.toIdentifiers(org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.getGlobalReceivers());
 	}
 
 	/**
@@ -116,13 +123,7 @@ public final class ClientConfigurationNetworking {
 	 * @see ClientPlayConnectionEvents#INIT
 	 */
 	public static <T extends CustomPayload> boolean registerReceiver(CustomPayload.Id<T> id, ConfigurationPayloadHandler<T> handler) {
-		final ClientConfigurationNetworkAddon addon = ClientNetworkingImpl.getClientConfigurationAddon();
-
-		if (addon != null) {
-			return addon.registerChannel(id.id(), handler);
-		}
-
-		throw new IllegalStateException("Cannot register receiver while not configuring!");
+		return org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.registerReceiver(id, handler);
 	}
 
 	/**
@@ -137,13 +138,9 @@ public final class ClientConfigurationNetworking {
 	 */
 	@Nullable
 	public static ClientConfigurationNetworking.ConfigurationPayloadHandler<?> unregisterReceiver(Identifier id) {
-		final ClientConfigurationNetworkAddon addon = ClientNetworkingImpl.getClientConfigurationAddon();
+		org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.CustomChannelReceiver<?> old = org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.unregisterReceiver(new CustomPayload.Id<>(id));
 
-		if (addon != null) {
-			return addon.unregisterChannel(id);
-		}
-
-		throw new IllegalStateException("Cannot unregister receiver while not configuring!");
+		return convertToFabricHandler(old);
 	}
 
 	/**
@@ -153,13 +150,7 @@ public final class ClientConfigurationNetworking {
 	 * @throws IllegalStateException if the client is not connected to a server
 	 */
 	public static Set<Identifier> getReceived() throws IllegalStateException {
-		final ClientConfigurationNetworkAddon addon = ClientNetworkingImpl.getClientConfigurationAddon();
-
-		if (addon != null) {
-			return addon.getReceivableChannels();
-		}
-
-		throw new IllegalStateException("Cannot get a list of channels the client can receive packets on while not configuring!");
+		return QuiltUtil.toIdentifiers(org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.getReceived());
 	}
 
 	/**
@@ -169,13 +160,7 @@ public final class ClientConfigurationNetworking {
 	 * @throws IllegalStateException if the client is not connected to a server
 	 */
 	public static Set<Identifier> getSendable() throws IllegalStateException {
-		final ClientConfigurationNetworkAddon addon = ClientNetworkingImpl.getClientConfigurationAddon();
-
-		if (addon != null) {
-			return addon.getSendableChannels();
-		}
-
-		throw new IllegalStateException("Cannot get a list of channels the server can receive packets on while not configuring!");
+		return QuiltUtil.toIdentifiers(org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.getSendable());
 	}
 
 	/**
@@ -186,13 +171,7 @@ public final class ClientConfigurationNetworking {
 	 * False if the client is not in game.
 	 */
 	public static boolean canSend(Identifier channelName) throws IllegalArgumentException {
-		final ClientConfigurationNetworkAddon addon = ClientNetworkingImpl.getClientConfigurationAddon();
-
-		if (addon != null) {
-			return addon.getSendableChannels().contains(channelName);
-		}
-
-		throw new IllegalStateException("Cannot get a list of channels the server can receive packets on while not configuring!");
+		return org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.canSend(new CustomPayload.Id<>(channelName));
 	}
 
 	/**
@@ -203,7 +182,7 @@ public final class ClientConfigurationNetworking {
 	 * @return {@code true} if the connected server has declared the ability to receive a packet on the specified channel
 	 */
 	public static boolean canSend(CustomPayload.Id<?> type) {
-		return canSend(type.id());
+		return org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.canSend(type);
 	}
 
 	/**
@@ -213,13 +192,7 @@ public final class ClientConfigurationNetworking {
 	 * @throws IllegalStateException if the client is not connected to a server
 	 */
 	public static PacketSender getSender() throws IllegalStateException {
-		final ClientConfigurationNetworkAddon addon = ClientNetworkingImpl.getClientConfigurationAddon();
-
-		if (addon != null) {
-			return addon;
-		}
-
-		throw new IllegalStateException("Cannot get PacketSender while not configuring!");
+		return QuiltUtil.toFabricSender(org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.getSender());
 	}
 
 	/**
@@ -231,17 +204,7 @@ public final class ClientConfigurationNetworking {
 	 * @throws IllegalStateException if the client is not connected to a server
 	 */
 	public static void send(CustomPayload payload) {
-		Objects.requireNonNull(payload, "Payload cannot be null");
-		Objects.requireNonNull(payload.getId(), "CustomPayload#getId() cannot return null for payload class: " + payload.getClass());
-
-		final ClientConfigurationNetworkAddon addon = ClientNetworkingImpl.getClientConfigurationAddon();
-
-		if (addon != null) {
-			addon.sendPacket(payload);
-			return;
-		}
-
-		throw new IllegalStateException("Cannot send packet while not configuring!");
+		org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.send(payload);
 	}
 
 	private ClientConfigurationNetworking() {
@@ -252,7 +215,7 @@ public final class ClientConfigurationNetworking {
 	 * @param <T> the type of the packet
 	 */
 	@FunctionalInterface
-	public interface ConfigurationPayloadHandler<T extends CustomPayload> {
+	public interface ConfigurationPayloadHandler<T extends CustomPayload> extends org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.CustomChannelReceiver<T> {
 		/**
 		 * Handles the incoming packet.
 		 *
@@ -272,6 +235,12 @@ public final class ClientConfigurationNetworking {
 		 * @see CustomPayload
 		 */
 		void receive(T payload, Context context);
+
+		@Override
+		default void receive(MinecraftClient client, ClientConfigurationNetworkHandler handler, T payload, org.quiltmc.qsl.networking.api.PacketSender<CustomPayload> responseSender) {
+			record ContextImpl(MinecraftClient client, ClientConfigurationNetworkHandler networkHandler, PacketSender responseSender) implements Context { }
+			this.receive(payload, new ContextImpl(client, handler, QuiltUtil.toFabricSender(responseSender)));
+		}
 	}
 
 	@ApiStatus.NonExtendable
@@ -290,5 +259,31 @@ public final class ClientConfigurationNetworking {
 		 * @return The packet sender
 		 */
 		PacketSender responseSender();
+	}
+
+	private static @Nullable ConfigurationPayloadHandler<?> convertToFabricHandler(org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.CustomChannelReceiver<?> old) {
+		if (old instanceof ConfigurationPayloadHandler<?> fabric) {
+			return fabric;
+		} else if (old != null) {
+			return (payload, context) -> {
+				if (old instanceof org.quiltmc.qsl.networking.api.client.ClientConfigurationNetworking.CustomChannelReceiver r) {
+					org.quiltmc.qsl.networking.api.PacketSender<CustomPayload> sender = QuiltUtil.toQuiltSender(context.responseSender());
+					r.receive(context.client(), getHandler(sender), payload, sender);
+				} else {
+					// This should never happen!
+					throw new UnsupportedOperationException("Unknown receiver type: " + old.getClass().getName());
+				}
+			};
+		} else {
+			return null;
+		}
+	}
+
+	private static ClientConfigurationNetworkHandler getHandler(org.quiltmc.qsl.networking.api.PacketSender<CustomPayload> sender) {
+		if (sender instanceof ClientConfigurationNetworkAddon addon) {
+			return ((ClientConfigurationNetworkAddonAccessor) (Object) addon).getHandler();
+		}
+
+		throw new IllegalStateException("Packet Sender was not from a ClientConfigurationNetworkAddon!");
 	}
 }

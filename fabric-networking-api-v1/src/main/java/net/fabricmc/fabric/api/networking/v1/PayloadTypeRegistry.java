@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2024 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +24,14 @@ import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 
-import net.fabricmc.fabric.impl.networking.PayloadTypeRegistryImpl;
+import net.fabricmc.fabric.impl.networking.QuiltUtil;
 
 /**
  * A registry for payload types.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.networking.api.PayloadTypeRegistry PayloadTypeRegistry}
  */
+@Deprecated
 @ApiStatus.NonExtendable
 public interface PayloadTypeRegistry<B extends PacketByteBuf> {
 	/**
@@ -47,27 +51,27 @@ public interface PayloadTypeRegistry<B extends PacketByteBuf> {
 	 * @return the {@link PayloadTypeRegistry} instance for the client to server configuration channel.
 	 */
 	static PayloadTypeRegistry<PacketByteBuf> configurationC2S() {
-		return PayloadTypeRegistryImpl.CONFIGURATION_C2S;
+		return QuiltUtil.fromQuilt(org.quiltmc.qsl.networking.api.PayloadTypeRegistry.configurationC2S());
 	}
 
 	/**
 	 * @return the {@link PayloadTypeRegistry} instance for the server to client configuration channel.
 	 */
 	static PayloadTypeRegistry<PacketByteBuf> configurationS2C() {
-		return PayloadTypeRegistryImpl.CONFIGURATION_S2C;
+		return QuiltUtil.fromQuilt(org.quiltmc.qsl.networking.api.PayloadTypeRegistry.configurationS2C());
 	}
 
 	/**
 	 * @return the {@link PayloadTypeRegistry} instance for the client to server play channel.
 	 */
 	static PayloadTypeRegistry<RegistryByteBuf> playC2S() {
-		return PayloadTypeRegistryImpl.PLAY_C2S;
+		return QuiltUtil.fromQuilt(org.quiltmc.qsl.networking.api.PayloadTypeRegistry.playC2S());
 	}
 
 	/**
 	 * @return the {@link PayloadTypeRegistry} instance for the server to client play channel.
 	 */
 	static PayloadTypeRegistry<RegistryByteBuf> playS2C() {
-		return PayloadTypeRegistryImpl.PLAY_S2C;
+		return QuiltUtil.fromQuilt(org.quiltmc.qsl.networking.api.PayloadTypeRegistry.playS2C());
 	}
 }

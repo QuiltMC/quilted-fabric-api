@@ -45,7 +45,8 @@ import net.minecraft.util.Identifier;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.fabric.impl.networking.PayloadTypeRegistryImpl;
+
+import org.quiltmc.qsl.networking.impl.PayloadTypeRegistryImpl;
 
 public final class NetworkingChannelTest implements ModInitializer {
 	@Override

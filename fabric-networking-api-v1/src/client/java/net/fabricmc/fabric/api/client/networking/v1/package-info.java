@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2024 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +43,8 @@
  *     and {@link net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents}, and related methods are found at
  *     {@link net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking}.</dd>
  * </dl>
+ *
+ * @deprecated see {@link org.quiltmc.qsl.networking.api.client}
  */
-
+@Deprecated
 package net.fabricmc.fabric.api.client.networking.v1;

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +22,14 @@ import net.minecraft.client.network.ClientLoginNetworkHandler;
 import net.minecraft.util.Identifier;
 
 import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.EventFactory;
+import net.fabricmc.fabric.impl.base.event.QuiltCompatEvent;
 
 /**
  * Offers access to events related to the connection to a server on the client while the server is processing the client's login request.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.networking.api.client.ClientLoginConnectionEvents ClientLoginConnectionEvents}
  */
+@Deprecated
 public final class ClientLoginConnectionEvents {
 	/**
 	 * Event indicating a connection entered the LOGIN state, ready for registering query request handlers.
@@ -34,11 +38,10 @@ public final class ClientLoginConnectionEvents {
 	 *
 	 * @see ClientLoginNetworking#registerReceiver(Identifier, ClientLoginNetworking.LoginQueryRequestHandler)
 	 */
-	public static final Event<Init> INIT = EventFactory.createArrayBacked(Init.class, callbacks -> (handler, client) -> {
-		for (Init callback : callbacks) {
-			callback.onLoginStart(handler, client);
-		}
-	});
+	public static final Event<Init> INIT = QuiltCompatEvent.fromQuilt(org.quiltmc.qsl.networking.api.client.ClientLoginConnectionEvents.INIT,
+			init -> init::onLoginStart,
+			invokerGetter -> invokerGetter.get()::onLoginStart
+	);
 
 	/**
 	 * An event for when the client has started receiving login queries.
@@ -54,22 +57,20 @@ public final class ClientLoginConnectionEvents {
 	 *
 	 * <p>No packets should be sent when this event is invoked.
 	 */
-	public static final Event<QueryStart> QUERY_START = EventFactory.createArrayBacked(QueryStart.class, callbacks -> (handler, client) -> {
-		for (QueryStart callback : callbacks) {
-			callback.onLoginQueryStart(handler, client);
-		}
-	});
+	public static final Event<QueryStart> QUERY_START = QuiltCompatEvent.fromQuilt(org.quiltmc.qsl.networking.api.client.ClientLoginConnectionEvents.QUERY_START,
+			disconnect -> disconnect::onLoginQueryStart,
+			invokerGetter -> invokerGetter.get()::onLoginQueryStart
+	);
 
 	/**
 	 * An event for when the client's login process has ended due to disconnection.
 	 *
 	 * <p>No packets should be sent when this event is invoked.
 	 */
-	public static final Event<Disconnect> DISCONNECT = EventFactory.createArrayBacked(Disconnect.class, callbacks -> (handler, client) -> {
-		for (Disconnect callback : callbacks) {
-			callback.onLoginDisconnect(handler, client);
-		}
-	});
+	public static final Event<Disconnect> DISCONNECT = QuiltCompatEvent.fromQuilt(org.quiltmc.qsl.networking.api.client.ClientLoginConnectionEvents.DISCONNECT,
+			disconnect -> disconnect::onLoginDisconnect,
+			invokerGetter -> invokerGetter.get()::onLoginDisconnect
+	);
 
 	private ClientLoginConnectionEvents() {
 	}
