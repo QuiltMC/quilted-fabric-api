@@ -8,3 +8,7 @@ testDependencies(project, [
 	':fabric-registry-sync-v0',
 	':fabric-rendering-v1'
 ])
+
+dependencies {
+	modApi getQslModule("entity", "entity_events")
+}

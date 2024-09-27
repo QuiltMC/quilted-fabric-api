@@ -24,6 +24,7 @@ import net.minecraft.server.world.ServerWorld;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
+import net.fabricmc.fabric.impl.base.event.QuiltCompatEvent;
 
 public final class ServerEntityEvents {
 	private ServerEntityEvents() {
@@ -33,23 +34,29 @@ public final class ServerEntityEvents {
 	 * Called when an Entity is loaded into a ServerWorld.
 	 *
 	 * <p>When this event is called, the entity is already in the world.
+	 *
+	 * @deprecated Use Quilt Entity Events' {@link org.quiltmc.qsl.entity.event.api.ServerEntityLoadEvents#AFTER_LOAD} instead.
 	 */
-	public static final Event<ServerEntityEvents.Load> ENTITY_LOAD = EventFactory.createArrayBacked(ServerEntityEvents.Load.class, callbacks -> (entity, world) -> {
-		for (Load callback : callbacks) {
-			callback.onLoad(entity, world);
-		}
-	});
+	@Deprecated
+	public static final Event<ServerEntityEvents.Load> ENTITY_LOAD = QuiltCompatEvent.fromQuilt(
+			org.quiltmc.qsl.entity.event.api.ServerEntityLoadEvents.AFTER_LOAD,
+			load -> load::onLoad,
+			invokerGetter -> (entity, world) -> invokerGetter.get().onLoad(entity, world)
+	);
 
 	/**
 	 * Called when an Entity is unloaded from a ServerWorld.
 	 *
 	 * <p>This event is called before the entity is removed from the world.
+	 *
+	 * @deprecated Use Quilt Entity Events' {@link org.quiltmc.qsl.entity.event.api.ServerEntityLoadEvents#AFTER_UNLOAD} instead.
 	 */
-	public static final Event<ServerEntityEvents.Unload> ENTITY_UNLOAD = EventFactory.createArrayBacked(ServerEntityEvents.Unload.class, callbacks -> (entity, world) -> {
-		for (Unload callback : callbacks) {
-			callback.onUnload(entity, world);
-		}
-	});
+	@Deprecated
+	public static final Event<ServerEntityEvents.Unload> ENTITY_UNLOAD = QuiltCompatEvent.fromQuilt(
+			org.quiltmc.qsl.entity.event.api.ServerEntityLoadEvents.AFTER_UNLOAD,
+			unload -> unload::onUnload,
+			invokerGetter -> (entity, world) -> invokerGetter.get().onUnload(entity, world)
+	);
 
 	/**
 	 * Called during {@link LivingEntity#tick()} if the Entity's equipment has been changed or mutated.

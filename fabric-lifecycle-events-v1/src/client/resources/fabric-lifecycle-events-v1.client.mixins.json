@@ -6,7 +6,6 @@
     "ClientChunkManagerMixin",
     "ClientPlayNetworkHandlerMixin",
     "ClientTagLoaderMixin",
-    "ClientWorldClientEntityHandlerMixin",
     "WorldChunkMixin"
   ],
   "injectors": {

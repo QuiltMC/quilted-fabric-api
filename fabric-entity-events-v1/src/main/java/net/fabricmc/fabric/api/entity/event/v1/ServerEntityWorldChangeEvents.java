@@ -21,13 +21,15 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 
 import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.EventFactory;
+import net.fabricmc.fabric.impl.base.event.QuiltCompatEvent;
 
 /**
  * Events related to an entity being moved to another world.
  *
  * @apiNote For a {@link ServerPlayerEntity}, please use {@link ServerEntityWorldChangeEvents#AFTER_PLAYER_CHANGE_WORLD}.
+ * @deprecated see {@link org.quiltmc.qsl.entity.event.api.EntityWorldChangeEvents EntityWorldChangeEvents}
  */
+@Deprecated
 public final class ServerEntityWorldChangeEvents {
 	/**
 	 * An event which is called after an entity has been moved to a different world.
@@ -39,11 +41,11 @@ public final class ServerEntityWorldChangeEvents {
 	 *
 	 * @see ServerEntityWorldChangeEvents#AFTER_PLAYER_CHANGE_WORLD
 	 */
-	public static final Event<AfterEntityChange> AFTER_ENTITY_CHANGE_WORLD = EventFactory.createArrayBacked(AfterEntityChange.class, callbacks -> (originalEntity, newEntity, origin, destination) -> {
-		for (AfterEntityChange callback : callbacks) {
-			callback.afterChangeWorld(originalEntity, newEntity, origin, destination);
-		}
-	});
+	public static final Event<AfterEntityChange> AFTER_ENTITY_CHANGE_WORLD = QuiltCompatEvent.fromQuilt(
+			org.quiltmc.qsl.entity.event.api.EntityWorldChangeEvents.AFTER_ENTITY_WORLD_CHANGE,
+			afterWorldChangeCallback -> afterWorldChangeCallback::afterChangeWorld,
+			invokerGetter -> invokerGetter.get()::afterWorldChange
+	);
 
 	/**
 	 * An event which is called after a player has been moved to a different world.
@@ -53,11 +55,11 @@ public final class ServerEntityWorldChangeEvents {
 	 *
 	 * @see ServerEntityWorldChangeEvents#AFTER_ENTITY_CHANGE_WORLD
 	 */
-	public static final Event<AfterPlayerChange> AFTER_PLAYER_CHANGE_WORLD = EventFactory.createArrayBacked(AfterPlayerChange.class, callbacks -> (player, origin, destination) -> {
-		for (AfterPlayerChange callback : callbacks) {
-			callback.afterChangeWorld(player, origin, destination);
-		}
-	});
+	public static final Event<AfterPlayerChange> AFTER_PLAYER_CHANGE_WORLD = QuiltCompatEvent.fromQuilt(
+			org.quiltmc.qsl.entity.event.api.EntityWorldChangeEvents.AFTER_PLAYER_WORLD_CHANGE,
+			afterWorldChangeCallback -> afterWorldChangeCallback::afterChangeWorld,
+			invokerGetter -> invokerGetter.get()::afterWorldChange
+	);
 
 	@FunctionalInterface
 	public interface AfterEntityChange {
