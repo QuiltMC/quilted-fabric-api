@@ -20,4 +20,5 @@ validateMixinNames {
 
 dependencies {
 	modApi getQslModule("block", "block_entity")
+	modApi getQslModule("entity", "entity_extensions")
 }

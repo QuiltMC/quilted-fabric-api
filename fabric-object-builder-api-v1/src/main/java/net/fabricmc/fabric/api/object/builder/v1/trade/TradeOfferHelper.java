@@ -30,7 +30,10 @@ import net.fabricmc.fabric.impl.object.builder.TradeOfferInternals;
 
 /**
  * Utilities to help with registration of trade offers.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.entity.extensions.api.TradeOfferHelper}
  */
+@Deprecated
 public final class TradeOfferHelper {
 	/**
 	 * Registers trade offer factories for use by villagers.
@@ -50,7 +53,7 @@ public final class TradeOfferHelper {
 	 * @param factories a consumer to provide the factories
 	 */
 	public static void registerVillagerOffers(VillagerProfession profession, int level, Consumer<List<TradeOffers.Factory>> factories) {
-		TradeOfferInternals.registerVillagerOffers(profession, level, (trades, rebalanced) -> factories.accept(trades));
+		org.quiltmc.qsl.entity.extensions.api.TradeOfferHelper.registerVillagerOffers(profession, level, factories);
 	}
 
 	/**
@@ -75,7 +78,7 @@ public final class TradeOfferHelper {
 	 */
 	@ApiStatus.Experimental
 	public static void registerVillagerOffers(VillagerProfession profession, int level, VillagerOffersAdder factories) {
-		TradeOfferInternals.registerVillagerOffers(profession, level, factories);
+		org.quiltmc.qsl.entity.extensions.api.TradeOfferHelper.registerVillagerOffers(profession, level, factories);
 	}
 
 	/**
@@ -87,7 +90,7 @@ public final class TradeOfferHelper {
 	 * @param factory a consumer to provide the factories
 	 */
 	public static void registerWanderingTraderOffers(int level, Consumer<List<TradeOffers.Factory>> factory) {
-		TradeOfferInternals.registerWanderingTraderOffers(level, factory);
+		org.quiltmc.qsl.entity.extensions.api.TradeOfferHelper.registerWanderingTraderOffers(level, factory);
 	}
 
 	/**
@@ -101,7 +104,21 @@ public final class TradeOfferHelper {
 	 */
 	@ApiStatus.Experimental
 	public static synchronized void registerRebalancedWanderingTraderOffers(Consumer<WanderingTraderOffersBuilder> factory) {
-		factory.accept(new TradeOfferInternals.WanderingTraderOffersBuilderImpl());
+		org.quiltmc.qsl.entity.extensions.api.TradeOfferHelper.registerRebalancedWanderingTraderOffers((builder -> {
+			factory.accept(new WanderingTraderOffersBuilder() {
+				@Override
+				public WanderingTraderOffersBuilder pool(Identifier id, int count, TradeOffers.Factory... factories) {
+					builder.pool(id, count, factories);
+					return this;
+				}
+
+				@Override
+				public WanderingTraderOffersBuilder addOffersToPool(Identifier pool, TradeOffers.Factory... factories) {
+					builder.addOffersToPool(pool, factories);
+					return this;
+				}
+			});
+		}));
 	}
 
 	/**
@@ -116,7 +133,7 @@ public final class TradeOfferHelper {
 	}
 
 	@FunctionalInterface
-	public interface VillagerOffersAdder {
+	public interface VillagerOffersAdder extends org.quiltmc.qsl.entity.extensions.api.TradeOfferHelper.VillagerOffersAdder {
 		void onRegister(List<TradeOffers.Factory> factories, boolean rebalanced);
 	}
 
@@ -129,7 +146,7 @@ public final class TradeOfferHelper {
 	 */
 	@ApiStatus.NonExtendable
 	@ApiStatus.Experimental
-	public interface WanderingTraderOffersBuilder {
+	public interface WanderingTraderOffersBuilder extends org.quiltmc.qsl.entity.extensions.api.TradeOfferHelper.WanderingTraderOffersBuilder {
 		/**
 		 * The pool ID for the "buy items" pool.
 		 * Two trade offers are picked from this pool.

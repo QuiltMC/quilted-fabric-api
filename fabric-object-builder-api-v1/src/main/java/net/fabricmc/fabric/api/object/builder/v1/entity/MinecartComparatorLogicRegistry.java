@@ -30,7 +30,10 @@ import net.minecraft.registry.Registries;
 
 /**
  * A registry for {@linkplain MinecartComparatorLogic custom minecart comparator logic}.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.entity.extensions.api.MinecartComparatorLogic MinecartComparatorLogic}
  */
+@Deprecated
 public final class MinecartComparatorLogicRegistry {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MinecartComparatorLogicRegistry.class);
 	private static final Map<EntityType<?>, MinecartComparatorLogic<?>> LOGICS = new IdentityHashMap<>();

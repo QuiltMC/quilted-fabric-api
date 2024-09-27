@@ -24,9 +24,8 @@ import org.slf4j.LoggerFactory;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.DefaultAttributeRegistry;
 import net.minecraft.registry.Registries;
-
-import net.fabricmc.fabric.mixin.object.builder.DefaultAttributeRegistryAccessor;
 
 /**
  * Allows registering custom default attributes for living entities.
@@ -38,7 +37,10 @@ import net.fabricmc.fabric.mixin.object.builder.DefaultAttributeRegistryAccessor
  * {@link net.minecraft.entity.attribute.DefaultAttributeRegistry#get(EntityType)}.</p>
  *
  * @see net.minecraft.entity.attribute.DefaultAttributeRegistry
+ *
+ * @deprecated see {@link DefaultAttributeRegistry#DEFAULT_ATTRIBUTE_REGISTRY DEFAULT_ATTRIBUTE_REGISTRY}
  */
+@Deprecated
 public final class FabricDefaultAttributeRegistry {
 	/**
 	 * Private logger, not exposed.
@@ -78,7 +80,7 @@ public final class FabricDefaultAttributeRegistry {
 	 * @see	FabricEntityType.Builder.Living#defaultAttributes(Supplier)
 	 */
 	public static void register(EntityType<? extends LivingEntity> type, DefaultAttributeContainer container) {
-		if (DefaultAttributeRegistryAccessor.getRegistry().put(type, container) != null) {
+		if (DefaultAttributeRegistry.DEFAULT_ATTRIBUTE_REGISTRY.put(type, container) != null) {
 			LOGGER.debug("Overriding existing registration for entity type {}", Registries.ENTITY_TYPE.getId(type));
 		}
 	}
