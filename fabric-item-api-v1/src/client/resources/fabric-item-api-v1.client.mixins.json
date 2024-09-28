@@ -4,8 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "client": [
     "ClientPlayerInteractionManagerMixin",
-    "HeldItemRendererMixin",
-    "ItemStackMixin"
+    "HeldItemRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

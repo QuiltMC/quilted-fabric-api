@@ -18,23 +18,27 @@ package net.fabricmc.fabric.api.client.item.v1;
 
 import java.util.List;
 
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 
 import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.EventFactory;
+import net.fabricmc.fabric.impl.base.event.QuiltCompatEvent;
 
+/**
+ * @deprecated see {@link org.quiltmc.qsl.tooltip.api.client.ItemTooltipCallback ItemTooltipCallback}
+ */
+@Deprecated
 public interface ItemTooltipCallback {
 	/**
 	 * Fired after the game has appended all base tooltip lines to the list.
 	 */
-	Event<ItemTooltipCallback> EVENT = EventFactory.createArrayBacked(ItemTooltipCallback.class, callbacks -> (stack, context, type, lines) -> {
-		for (ItemTooltipCallback callback : callbacks) {
-			callback.getTooltip(stack, context, type, lines);
-		}
-	});
+	Event<ItemTooltipCallback> EVENT = QuiltCompatEvent.fromQuilt(org.quiltmc.qsl.tooltip.api.client.ItemTooltipCallback.EVENT,
+			itemTooltipCallback -> (stack, player, context, tooltipType, lines) -> itemTooltipCallback.getTooltip(stack, context, tooltipType, lines),
+			invokerGetter -> (stack, context, tooltipType, lines) -> invokerGetter.get().onTooltipRequest(stack, MinecraftClient.getInstance().player, context, tooltipType, lines)
+	);
 
 	/**
 	 * Called when an item stack's tooltip is rendered. Text added to {@code lines} will be
