@@ -16,45 +16,24 @@
 
 package net.fabricmc.fabric.mixin.screen;
 
-import java.util.List;
-
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ClickableWidget;
 
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.impl.client.screen.ButtonList;
 import net.fabricmc.fabric.impl.client.screen.ScreenEventFactory;
 import net.fabricmc.fabric.impl.client.screen.ScreenExtensions;
 
 @Mixin(Screen.class)
 abstract class ScreenMixin implements ScreenExtensions {
-	@Shadow
-	@Final
-	protected List<Selectable> selectables;
-	@Shadow
-	@Final
-	protected List<Element> children;
-	@Shadow
-	@Final
-	protected List<Drawable> drawables;
-
-	@Unique
-	private ButtonList fabricButtons;
 	@Unique
 	private Event<ScreenEvents.Remove> removeEvent;
 	@Unique
@@ -123,7 +102,6 @@ abstract class ScreenMixin implements ScreenExtensions {
 	@Unique
 	private void beforeInit(MinecraftClient client, int width, int height) {
 		// All elements are repopulated on the screen, so we need to reinitialize all events
-		this.fabricButtons = null;
 		this.removeEvent = ScreenEventFactory.createRemoveEvent();
 		this.beforeRenderEvent = ScreenEventFactory.createBeforeRenderEvent();
 		this.afterRenderEvent = ScreenEventFactory.createAfterRenderEvent();
@@ -149,22 +127,15 @@ abstract class ScreenMixin implements ScreenExtensions {
 		this.beforeMouseScrollEvent = ScreenEventFactory.createBeforeMouseScrollEvent();
 		this.afterMouseScrollEvent = ScreenEventFactory.createAfterMouseScrollEvent();
 
+		// Activate our Fabric events
+		ScreenEventFactory.activateScreen((Screen) (Object) this);
+
 		ScreenEvents.BEFORE_INIT.invoker().beforeInit(client, (Screen) (Object) this, width, height);
 	}
 
 	@Unique
 	private void afterInit(MinecraftClient client, int width, int height) {
 		ScreenEvents.AFTER_INIT.invoker().afterInit(client, (Screen) (Object) this, width, height);
-	}
-
-	@Override
-	public List<ClickableWidget> fabric_getButtons() {
-		// Lazy init to make the list access safe after Screen#init
-		if (this.fabricButtons == null) {
-			this.fabricButtons = new ButtonList(this.drawables, this.selectables, this.children);
-		}
-
-		return this.fabricButtons;
 	}
 
 	@Unique

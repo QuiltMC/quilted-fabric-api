@@ -40,7 +40,10 @@ import net.fabricmc.fabric.impl.client.screen.ScreenExtensions;
  * @see Screens
  * @see ScreenKeyboardEvents
  * @see ScreenMouseEvents
+ *
+ * @deprecated see {@link org.quiltmc.qsl.screen.api.client.ScreenEvents ScreenEvents}
  */
+@Deprecated
 
 public final class ScreenEvents {
 	/**

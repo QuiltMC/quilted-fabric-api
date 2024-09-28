@@ -35,7 +35,10 @@ import net.fabricmc.fabric.impl.client.screen.ScreenExtensions;
  * If the result of the Allow event is false, then Before and After are not called.
  *
  * @see ScreenEvents
+ *
+ * @deprecated see {@link org.quiltmc.qsl.screen.api.client.ScreenMouseEvents ScreenMouseEvents}
  */
+@Deprecated
 public final class ScreenMouseEvents {
 	/**
 	 * An event that checks if the mouse click should be allowed.

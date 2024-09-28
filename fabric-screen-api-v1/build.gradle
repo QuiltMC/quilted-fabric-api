@@ -1,3 +1,7 @@
 version = getSubprojectVersion(project)
 
 moduleDependencies(project, ['fabric-api-base'])
+
+dependencies {
+	modApi getQslModule("gui", "screen")
+}

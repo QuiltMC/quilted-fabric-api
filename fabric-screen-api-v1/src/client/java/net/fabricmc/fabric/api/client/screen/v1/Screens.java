@@ -24,14 +24,14 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ClickableWidget;
 
-import net.fabricmc.fabric.impl.client.screen.ScreenExtensions;
-import net.fabricmc.fabric.mixin.screen.ScreenAccessor;
-
 /**
  * Utility methods related to screens.
  *
  * @see ScreenEvents
+ *
+ * @deprecated see {@link org.quiltmc.qsl.screen.api.client.QuiltScreen QuiltScreen}
  */
+@Deprecated
 public final class Screens {
 	/**
 	 * Gets all of a screen's button widgets.
@@ -43,7 +43,7 @@ public final class Screens {
 	public static List<ClickableWidget> getButtons(Screen screen) {
 		Objects.requireNonNull(screen, "Screen cannot be null");
 
-		return ScreenExtensions.getExtensions(screen).fabric_getButtons();
+		return screen.getButtons();
 	}
 
 	/**
@@ -54,13 +54,13 @@ public final class Screens {
 	public static TextRenderer getTextRenderer(Screen screen) {
 		Objects.requireNonNull(screen, "Screen cannot be null");
 
-		return ((ScreenAccessor) screen).getTextRenderer();
+		return screen.getTextRenderer();
 	}
 
 	public static MinecraftClient getClient(Screen screen) {
 		Objects.requireNonNull(screen, "Screen cannot be null");
 
-		return ((ScreenAccessor) screen).getClient();
+		return screen.getClient();
 	}
 
 	private Screens() {

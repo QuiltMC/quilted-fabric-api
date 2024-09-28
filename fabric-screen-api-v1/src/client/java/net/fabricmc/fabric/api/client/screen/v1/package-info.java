@@ -26,5 +26,8 @@
  * <p>For screen events related to the use of a keyboard, see {@link net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents}.
  *
  * @see net.fabricmc.fabric.api.client.screen.v1.Screens
+ *
+ * @deprecated see {@link org.quiltmc.qsl.screen.api.client}
  */
+@Deprecated
 package net.fabricmc.fabric.api.client.screen.v1;

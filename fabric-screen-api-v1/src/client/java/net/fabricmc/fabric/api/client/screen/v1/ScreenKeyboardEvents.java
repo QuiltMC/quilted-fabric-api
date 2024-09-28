@@ -35,7 +35,10 @@ import net.fabricmc.fabric.impl.client.screen.ScreenExtensions;
  * If the result of the Allow event is false, then Before and After are not called.
  *
  * @see ScreenEvents
+ *
+ * @deprecated see {@link org.quiltmc.qsl.screen.api.client.ScreenKeyboardEvents ScreenKeyboardEvents}
  */
+@Deprecated
 public final class ScreenKeyboardEvents {
 	/**
 	 * An event that checks if a key press should be allowed.

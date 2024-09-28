@@ -36,7 +36,10 @@
 				"id": "fabric-screen-api-v1",
 				"version": "${upstream_version}"
 			}
-		]
+		],
+		"entrypoints": {
+			"client_init": "net.fabricmc.fabric.impl.client.screen.ScreenEventFactory::initializeQuiltEventBridges"
+		}
 	},
 	"mixin": [
 		"fabric-screen-api-v1.mixins.json"
