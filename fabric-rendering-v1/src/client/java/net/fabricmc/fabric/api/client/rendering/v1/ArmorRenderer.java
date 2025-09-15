@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +39,10 @@ import net.fabricmc.fabric.impl.client.rendering.ArmorRendererRegistryImpl;
  * They may be used to render armor with special models or effects.
  *
  * <p>The renderers are registered with {@link net.fabricmc.fabric.api.client.rendering.v1.ArmorRenderer#register(ArmorRenderer, ItemConvertible...)}.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.rendering.entity.api.client.ArmorRenderingRegistry}
  */
+@Deprecated
 @FunctionalInterface
 public interface ArmorRenderer {
 	/**
