@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +24,7 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 
 import net.fabricmc.fabric.api.event.Event;
-import net.fabricmc.fabric.api.event.EventFactory;
+import net.fabricmc.fabric.impl.base.event.QuiltCompatEvent;
 
 /**
  * Callback for when a server registers all commands.
@@ -36,13 +37,15 @@ import net.fabricmc.fabric.api.event.EventFactory;
  *     if (environment.integrated) dispatcher.register(CommandManager.literal("integrated_command").executes(context -> {...}));
  * })};
  * }</pre>
+ *
+ * @deprecated see {@link org.quiltmc.qsl.command.api.CommandRegistrationCallback}
  */
+@Deprecated
 public interface CommandRegistrationCallback {
-	Event<CommandRegistrationCallback> EVENT = EventFactory.createArrayBacked(CommandRegistrationCallback.class, (callbacks) -> (dispatcher, registryAccess, environment) -> {
-		for (CommandRegistrationCallback callback : callbacks) {
-			callback.register(dispatcher, registryAccess, environment);
-		}
-	});
+	Event<CommandRegistrationCallback> EVENT = QuiltCompatEvent.fromQuilt(org.quiltmc.qsl.command.api.CommandRegistrationCallback.EVENT,
+			callback -> callback::register,
+			invokerGetter -> invokerGetter.get()::registerCommands
+	);
 
 	/**
 	 * Called when the server is registering commands.

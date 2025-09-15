@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +19,25 @@ package net.fabricmc.fabric.api.command.v2;
 
 import net.minecraft.util.Identifier;
 
+import org.quiltmc.qsl.command.api.QuiltEntitySelectorReader;
+
 /**
  * Fabric extension to {@link net.minecraft.command.EntitySelectorReader}, implemented
  * using interface injection. This allows custom entity selectors to
  * set a custom flag to a reader. This can be used to implement mutually-exclusive
  * or non-repeatable entity selector option.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.command.api.QuiltEntitySelectorReader}
  */
-public interface FabricEntitySelectorReader {
+@Deprecated
+public interface FabricEntitySelectorReader extends QuiltEntitySelectorReader {
 	/**
 	 * Sets a flag.
 	 * @param key the key of the flag
 	 * @param value the value of the flag
 	 */
 	default void setCustomFlag(Identifier key, boolean value) {
-		throw new UnsupportedOperationException("Implemented via mixin");
+		this.setFlag(key.toUnderscoreSeparatedString(), value);
 	}
 
 	/**
@@ -40,6 +46,6 @@ public interface FabricEntitySelectorReader {
 	 * @return the value, or {@code false} if the flag is not set
 	 */
 	default boolean getCustomFlag(Identifier key) {
-		throw new UnsupportedOperationException("Implemented via mixin");
+		return this.getFlag(key.toUnderscoreSeparatedString());
 	}
 }

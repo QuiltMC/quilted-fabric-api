@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +18,15 @@
 package net.fabricmc.fabric.api.command.v2;
 
 import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 
 import net.minecraft.command.argument.serialize.ArgumentSerializer;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
-import net.fabricmc.fabric.mixin.command.ArgumentTypesAccessor;
-
+/**
+ * @deprecated see {@link org.quiltmc.qsl.command.api.ServerArgumentType}
+ */
+@Deprecated
 public final class ArgumentTypeRegistry {
 	/**
 	 * Register a new argument type.
@@ -37,8 +39,7 @@ public final class ArgumentTypeRegistry {
 	 */
 	public static <A extends ArgumentType<?>, T extends ArgumentSerializer.ArgumentTypeProperties<A>> void registerArgumentType(
 			Identifier id, Class<? extends A> clazz, ArgumentSerializer<A, T> serializer) {
-		ArgumentTypesAccessor.fabric_getClassMap().put(clazz, serializer);
-		Registry.register(Registries.COMMAND_ARGUMENT_TYPE, id, serializer);
+		org.quiltmc.qsl.command.api.ServerArgumentType.register(id, clazz, serializer, arg -> StringArgumentType.word());
 	}
 
 	private ArgumentTypeRegistry() {

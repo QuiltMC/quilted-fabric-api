@@ -12,4 +12,5 @@ loom {
 
 dependencies {
 	modApi getQslModule("management", "client_command")
+	modApi getQslModule("management", "command")
 }

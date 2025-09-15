@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +24,12 @@ import net.minecraft.command.EntitySelectorReader;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-import net.fabricmc.fabric.mixin.command.EntitySelectorOptionsAccessor;
-
 /**
  * Contains a function to register an entity selector option.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.command.api.EntitySelectorOptionRegistry}
  */
+@Deprecated
 public final class EntitySelectorOptionRegistry {
 	private EntitySelectorOptionRegistry() {
 	}
@@ -64,7 +66,7 @@ public final class EntitySelectorOptionRegistry {
 	 * @param canUse the predicate that checks whether the option is syntactically valid
 	 */
 	public static void register(Identifier id, Text description, EntitySelectorOptions.SelectorHandler handler, Predicate<EntitySelectorReader> canUse) {
-		EntitySelectorOptionsAccessor.callPutOption(id.toUnderscoreSeparatedString(), handler, canUse, description);
+		org.quiltmc.qsl.command.api.EntitySelectorOptionRegistry.register(id, handler, canUse, description);
 	}
 
 	/**
