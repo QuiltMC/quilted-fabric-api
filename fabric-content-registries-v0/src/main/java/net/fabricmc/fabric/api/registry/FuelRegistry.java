@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +22,10 @@ import net.fabricmc.fabric.impl.content.registry.FuelRegistryImpl;
 
 /**
  * Registry of items to 0-32767 fuel burn time values, in in-game ticks.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.item.content.registry.api.ItemContentRegistries#FUEL_TIMES FUEL_TIMES}
  */
+@Deprecated
 public interface FuelRegistry extends Item2ObjectMap<Integer> {
 	FuelRegistry INSTANCE = new FuelRegistryImpl();
 }

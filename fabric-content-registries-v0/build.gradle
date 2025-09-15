@@ -13,4 +13,5 @@ moduleDependencies(project, [
 dependencies {
 	modApi getQslModule("block", "block_content_registry")
 	modApi getQslModule("core", "registry")
+	modApi getQslModule("item", "item_content_registry")
 }

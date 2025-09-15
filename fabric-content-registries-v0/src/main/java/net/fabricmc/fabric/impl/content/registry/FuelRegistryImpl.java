@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,117 +17,52 @@
 
 package net.fabricmc.fabric.impl.content.registry;
 
-import java.util.Map;
-
-import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.TagKey;
 
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 
-// TODO: Clamp values to 32767 (+ add hook for mods which extend the limit to disable the check?)
+import org.quiltmc.qsl.item.content.registry.api.ItemContentRegistries;
+import org.quiltmc.quilted_fabric_api.impl.content.registry.util.QuiltDeferringQueues;
+
+// Fabric To-Do: Clamp values to 32767 (+ add hook for mods which extend the limit to disable the check?)
+// About that, Quilt's equivalent API supports integer values properly, no need for that
 public final class FuelRegistryImpl implements FuelRegistry {
-	private static final Logger LOGGER = LoggerFactory.getLogger(FuelRegistryImpl.class);
-	private final Object2IntMap<ItemConvertible> itemCookTimes = new Object2IntLinkedOpenHashMap<>();
-	private final Object2IntMap<TagKey<Item>> tagCookTimes = new Object2IntLinkedOpenHashMap<>();
-
-	public FuelRegistryImpl() {
-	}
-
-	public Map<Item, Integer> getFuelTimes() {
-		// Cached by vanilla now
-		return AbstractFurnaceBlockEntity.createFuelTimeMap();
-	}
+	public FuelRegistryImpl() { }
 
 	@Override
 	public Integer get(ItemConvertible item) {
-		return getFuelTimes().get(item.asItem());
+		return ItemContentRegistries.FUEL_TIMES.getNullable(item.asItem());
 	}
 
 	@Override
 	public void add(ItemConvertible item, Integer cookTime) {
-		if (cookTime > 32767) {
-			LOGGER.warn("Tried to register an overly high cookTime: " + cookTime + " > 32767! (" + item + ")");
-		}
-
-		itemCookTimes.put(item, cookTime.intValue());
-		resetCache();
+		QuiltDeferringQueues.addEntryWithItemConvertible(ItemContentRegistries.FUEL_TIMES, item, cookTime);
 	}
 
 	@Override
 	public void add(TagKey<Item> tag, Integer cookTime) {
-		if (cookTime > 32767) {
-			LOGGER.warn("Tried to register an overly high cookTime: " + cookTime + " > 32767! (" + getTagName(tag) + ")");
-		}
-
-		tagCookTimes.put(tag, cookTime.intValue());
-		resetCache();
+		ItemContentRegistries.FUEL_TIMES.put(tag, cookTime);
 	}
 
 	@Override
 	public void remove(ItemConvertible item) {
-		add(item, 0);
-		resetCache();
+		ItemContentRegistries.FUEL_TIMES.put(item.asItem(), 0);
 	}
 
 	@Override
 	public void remove(TagKey<Item> tag) {
-		add(tag, 0);
-		resetCache();
+		ItemContentRegistries.FUEL_TIMES.put(tag, 0);
 	}
 
 	@Override
 	public void clear(ItemConvertible item) {
-		itemCookTimes.removeInt(item);
-		resetCache();
+		ItemContentRegistries.FUEL_TIMES.remove(item.asItem());
 	}
 
 	@Override
 	public void clear(TagKey<Item> tag) {
-		tagCookTimes.removeInt(tag);
-		resetCache();
-	}
-
-	public void apply(Map<Item, Integer> map) {
-		// tags take precedence before blocks
-		for (TagKey<Item> tag : tagCookTimes.keySet()) {
-			int time = tagCookTimes.getInt(tag);
-
-			if (time <= 0) {
-				for (RegistryEntry<Item> key : Registries.ITEM.iterateEntries(tag)) {
-					final Item item = key.value();
-					map.remove(item);
-				}
-			} else {
-				AbstractFurnaceBlockEntity.addFuel(map, tag, time);
-			}
-		}
-
-		for (ItemConvertible item : itemCookTimes.keySet()) {
-			int time = itemCookTimes.getInt(item);
-
-			if (time <= 0) {
-				map.remove(item.asItem());
-			} else {
-				AbstractFurnaceBlockEntity.addFuel(map, item, time);
-			}
-		}
-	}
-
-	private static String getTagName(TagKey<?> tag) {
-		return tag.id().toString();
-	}
-
-	public void resetCache() {
-		// Note: tag reload is already handled by vanilla, see DataPackContents#refresh
-		AbstractFurnaceBlockEntity.clearFuelTimes();
+		ItemContentRegistries.FUEL_TIMES.remove(tag);
 	}
 }

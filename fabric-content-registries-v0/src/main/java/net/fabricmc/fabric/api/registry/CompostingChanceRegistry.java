@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +23,10 @@ import net.fabricmc.fabric.impl.content.registry.CompostingChanceRegistryImpl;
 /**
  * Registry of items to 0.0-1.0 values, defining the chance of a given item
  * increasing the Composter block's level.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.item.content.registry.api.ItemContentRegistries#COMPOST_CHANCES COMPOST_CHANCES}
  */
+@Deprecated
 public interface CompostingChanceRegistry extends Item2ObjectMap<Float> {
 	CompostingChanceRegistry INSTANCE = new CompostingChanceRegistryImpl();
 }

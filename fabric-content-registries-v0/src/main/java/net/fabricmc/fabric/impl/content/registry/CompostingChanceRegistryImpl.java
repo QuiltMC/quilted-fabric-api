@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,37 +17,45 @@
 
 package net.fabricmc.fabric.impl.content.registry;
 
-import net.minecraft.block.ComposterBlock;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.registry.tag.TagKey;
 
 import net.fabricmc.fabric.api.registry.CompostingChanceRegistry;
 
+import org.quiltmc.qsl.item.content.registry.api.ItemContentRegistries;
+import org.quiltmc.quilted_fabric_api.impl.content.registry.util.QuiltDeferringQueues;
+
 public class CompostingChanceRegistryImpl implements CompostingChanceRegistry {
 	@Override
 	public Float get(ItemConvertible item) {
-		return ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.getOrDefault(item.asItem(), 0.0F);
+		return ItemContentRegistries.COMPOST_CHANCES.get(item.asItem()).orElse(0.0F);
 	}
 
 	@Override
 	public void add(ItemConvertible item, Float value) {
-		ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.put(item.asItem(), value);
+		QuiltDeferringQueues.addEntryWithItemConvertible(ItemContentRegistries.COMPOST_CHANCES, item, value);
 	}
 
+	/**
+	 * @throws UnsupportedOperationException if ran on Fabric API, which currently doesn't implement this method
+	 */
 	@Override
-	public void add(TagKey<Item> tag, Float value) {
-		throw new UnsupportedOperationException("Tags currently not supported!");
+	public void add(TagKey<Item> tag, Float value) throws UnsupportedOperationException {
+		ItemContentRegistries.COMPOST_CHANCES.put(tag, value);
 	}
 
 	@Override
 	public void remove(ItemConvertible item) {
-		ComposterBlock.ITEM_TO_LEVEL_INCREASE_CHANCE.removeFloat(item.asItem());
+		ItemContentRegistries.COMPOST_CHANCES.remove(item.asItem());
 	}
 
+	/**
+	 * @throws UnsupportedOperationException if ran on Fabric API, which currently doesn't implement this method
+	 */
 	@Override
 	public void remove(TagKey<Item> tag) {
-		throw new UnsupportedOperationException("Tags currently not supported!");
+		ItemContentRegistries.COMPOST_CHANCES.remove(tag);
 	}
 
 	@Override

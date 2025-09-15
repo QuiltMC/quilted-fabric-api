@@ -8,7 +8,6 @@
     "GiveGiftsToHeroTaskAccessor",
     "HoeItemAccessor",
     "LandPathNodeMakerMixin",
-    "AbstractFurnaceBlockEntityMixin",
     "VillagerEntityAccessor"
   ],
   "injectors": {
