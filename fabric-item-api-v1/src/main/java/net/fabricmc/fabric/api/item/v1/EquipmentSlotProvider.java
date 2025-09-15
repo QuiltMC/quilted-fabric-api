@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +17,6 @@
 
 package net.fabricmc.fabric.api.item.v1;
 
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-
 /**
  * A provider for the preferred equipment slot of an item.
  * This can be used to give non-armor items, such as blocks,
@@ -32,22 +29,10 @@ import net.minecraft.item.ItemStack;
  *
  * <p>Note that items extending {@link net.minecraft.item.ArmorItem} don't need to use this
  * as there's {@link net.minecraft.item.ArmorItem#getSlotType()}.
+ *
+ * @deprecated Use Quilt Item Setting API's {@link org.quiltmc.qsl.item.setting.api.EquipmentSlotProvider} instead.
  */
+@Deprecated
 @FunctionalInterface
-public interface EquipmentSlotProvider {
-	/**
-	 * Gets the preferred equipment slot for an item stack.
-	 *
-	 * <p>If there is no preferred armor equipment slot for the stack,
-	 * {@link EquipmentSlot#MAINHAND} can be returned.
-	 *
-	 * <p>Callers are expected to check themselves whether the slot is available for the
-	 * {@code entity} using {@link LivingEntity#canUseSlot}. For example, players
-	 * cannot use {@link EquipmentSlot#BODY}, which is instead used for items like horse armors.
-	 *
-	 * @param entity the entity
-	 * @param stack the item stack
-	 * @return the preferred equipment slot
-	 */
-	EquipmentSlot getPreferredEquipmentSlot(LivingEntity entity, ItemStack stack);
+public interface EquipmentSlotProvider extends org.quiltmc.qsl.item.setting.api.EquipmentSlotProvider {
 }

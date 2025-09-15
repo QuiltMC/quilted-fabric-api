@@ -8,4 +8,5 @@ testDependencies(project, [
 
 dependencies {
 	modApi getQslModule("gui", "tooltip")
+	modApi getQslModule("item", "item_setting")
 }

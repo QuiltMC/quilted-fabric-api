@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Hand;
 
-import net.fabricmc.fabric.impl.item.FabricItemInternals;
+import org.quiltmc.qsl.item.setting.api.QuiltItemSettings;
 
 /**
  * General-purpose Fabric-provided extensions for {@link Item} subclasses.
@@ -120,28 +121,10 @@ public interface FabricItem {
 	/**
 	 * Fabric-provided extensions for {@link Item.Settings}.
 	 * This interface is automatically implemented on all item settings via Mixin and interface injection.
+	 *
+	 * @deprecated see {@link org.quiltmc.qsl.item.setting.api.QuiltItemSettings}
 	 */
-	interface Settings {
-		/**
-		 * Sets the equipment slot provider of the item.
-		 *
-		 * @param equipmentSlotProvider the equipment slot provider
-		 * @return this builder
-		 */
-		default Item.Settings equipmentSlot(EquipmentSlotProvider equipmentSlotProvider) {
-			FabricItemInternals.computeExtraData((Item.Settings) this).equipmentSlot(equipmentSlotProvider);
-			return (Item.Settings) this;
-		}
-
-		/**
-		 * Sets the custom damage handler of the item.
-		 * Note that this is only called on an ItemStack if {@link ItemStack#isDamageable()} returns true.
-		 *
-		 * @see CustomDamageHandler
-		 */
-		default Item.Settings customDamage(CustomDamageHandler handler) {
-			FabricItemInternals.computeExtraData((Item.Settings) this).customDamage(handler);
-			return (Item.Settings) this;
-		}
+	@Deprecated
+	interface Settings extends QuiltItemSettings {
 	}
 }
