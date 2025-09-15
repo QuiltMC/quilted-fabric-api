@@ -41,7 +41,6 @@
 	"mixin": [
 		"fabric-biome-api-v1.mixins.json"
 	],
-	"access_widener": "fabric-biome-api-v1.accesswidener",
 	"minecraft": {
 		"environment": "*"
 	},

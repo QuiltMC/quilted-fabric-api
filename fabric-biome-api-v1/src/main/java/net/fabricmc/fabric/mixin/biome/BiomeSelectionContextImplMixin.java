@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,24 +17,10 @@
 package net.fabricmc.fabric.mixin.biome;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 
-import net.minecraft.world.biome.source.MultiNoiseBiomeSource;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext;
 
-import net.fabricmc.fabric.impl.biome.BiomeSourceAccess;
+import org.quiltmc.qsl.worldgen.biome.impl.modification.BiomeSelectionContextImpl;
 
-@Mixin(MultiNoiseBiomeSource.class)
-public class MultiNoiseBiomeSourceMixin implements BiomeSourceAccess {
-	@Unique
-	private boolean modifyBiomeEntries = true;
-
-	@Override
-	public void fabric_setModifyBiomeEntries(boolean modifyBiomeEntries) {
-		this.modifyBiomeEntries = modifyBiomeEntries;
-	}
-
-	@Override
-	public boolean fabric_shouldModifyBiomeEntries() {
-		return this.modifyBiomeEntries;
-	}
-}
+@Mixin(BiomeSelectionContextImpl.class)
+public abstract class BiomeSelectionContextImplMixin implements BiomeSelectionContext { }

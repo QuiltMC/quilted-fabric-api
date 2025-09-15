@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +35,10 @@ import net.minecraft.world.gen.feature.PlacedFeature;
  * Provides an API to modify Biomes after they have been loaded and before they are used in the World.
  *
  * <p>Any modifications made to biomes will not be available for use in the demo level.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.worldgen.biome.api.BiomeModifications}.
  */
+@Deprecated
 public final class BiomeModifications {
 	private BiomeModifications() {
 	}

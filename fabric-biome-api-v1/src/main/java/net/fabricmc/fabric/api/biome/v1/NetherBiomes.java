@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +21,12 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 
-import net.fabricmc.fabric.impl.biome.NetherBiomeData;
-
 /**
  * API that exposes the internals of Minecraft's nether biome code.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.worldgen.biome.api.NetherBiomes}.
  */
+@Deprecated
 public final class NetherBiomes {
 	private NetherBiomes() {
 	}
@@ -37,15 +39,7 @@ public final class NetherBiomes {
 	 * @see MultiNoiseUtil.NoiseValuePoint
 	 */
 	public static void addNetherBiome(RegistryKey<Biome> biome, MultiNoiseUtil.NoiseValuePoint mixedNoisePoint) {
-		NetherBiomeData.addNetherBiome(biome, MultiNoiseUtil.createNoiseHypercube(
-				mixedNoisePoint.temperatureNoise(),
-				mixedNoisePoint.humidityNoise(),
-				mixedNoisePoint.continentalnessNoise(),
-				mixedNoisePoint.erosionNoise(),
-				mixedNoisePoint.depth(),
-				mixedNoisePoint.weirdnessNoise(),
-				0
-		));
+		org.quiltmc.qsl.worldgen.biome.api.NetherBiomes.addNetherBiome(biome, mixedNoisePoint);
 	}
 
 	/**
@@ -56,7 +50,7 @@ public final class NetherBiomes {
 	 * @see MultiNoiseUtil.NoiseHypercube
 	 */
 	public static void addNetherBiome(RegistryKey<Biome> biome, MultiNoiseUtil.NoiseHypercube mixedNoisePoint) {
-		NetherBiomeData.addNetherBiome(biome, mixedNoisePoint);
+		org.quiltmc.qsl.worldgen.biome.api.NetherBiomes.addNetherBiome(biome, mixedNoisePoint);
 	}
 
 	/**
@@ -64,6 +58,6 @@ public final class NetherBiomes {
 	 * and any biomes added to the Nether by mods.
 	 */
 	public static boolean canGenerateInNether(RegistryKey<Biome> biome) {
-		return NetherBiomeData.canGenerateInNether(biome);
+		return org.quiltmc.qsl.worldgen.biome.api.NetherBiomes.canGenerateInNether(biome);
 	}
 }

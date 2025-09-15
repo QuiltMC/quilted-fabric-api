@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +19,13 @@ package net.fabricmc.fabric.api.biome.v1;
 
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
-
-import net.fabricmc.fabric.impl.biome.TheEndBiomeData;
 
 /**
  * API that exposes some internals of the minecraft default biome source for The End.
  *
+ * @deprecated see {@link org.quiltmc.qsl.worldgen.biome.api.TheEndBiomes}.
  */
+@Deprecated
 public final class TheEndBiomes {
 	private TheEndBiomes() {
 	}
@@ -42,7 +42,7 @@ public final class TheEndBiomes {
 	 *               Vanilla biomes have a weight of 1.0
 	 */
 	public static void addMainIslandBiome(RegistryKey<Biome> biome, double weight) {
-		TheEndBiomeData.addEndBiomeReplacement(BiomeKeys.THE_END, biome, weight);
+		org.quiltmc.qsl.worldgen.biome.api.TheEndBiomes.addMainIslandBiome(biome, weight);
 	}
 
 	/**
@@ -55,7 +55,7 @@ public final class TheEndBiomes {
 	 *               The vanilla biome has a weight of 1.0.
 	 */
 	public static void addHighlandsBiome(RegistryKey<Biome> biome, double weight) {
-		TheEndBiomeData.addEndBiomeReplacement(BiomeKeys.END_HIGHLANDS, biome, weight);
+		org.quiltmc.qsl.worldgen.biome.api.TheEndBiomes.addHighlandsBiome(biome, weight);
 	}
 
 	/**
@@ -68,7 +68,7 @@ public final class TheEndBiomes {
 	 *               The vanilla biome has a weight of 1.0.
 	 */
 	public static void addSmallIslandsBiome(RegistryKey<Biome> biome, double weight) {
-		TheEndBiomeData.addEndBiomeReplacement(BiomeKeys.SMALL_END_ISLANDS, biome, weight);
+		org.quiltmc.qsl.worldgen.biome.api.TheEndBiomes.addSmallIslandsBiome(biome, weight);
 	}
 
 	/**
@@ -83,7 +83,7 @@ public final class TheEndBiomes {
 	 *                  The vanilla biome has a weight of 1.0.
 	 */
 	public static void addMidlandsBiome(RegistryKey<Biome> highlands, RegistryKey<Biome> midlands, double weight) {
-		TheEndBiomeData.addEndMidlandsReplacement(highlands, midlands, weight);
+		org.quiltmc.qsl.worldgen.biome.api.TheEndBiomes.addMidlandsBiome(highlands, midlands, weight);
 	}
 
 	/**
@@ -98,6 +98,6 @@ public final class TheEndBiomes {
 	 *                  The vanilla biome has a weight of 1.0.
 	 */
 	public static void addBarrensBiome(RegistryKey<Biome> highlands, RegistryKey<Biome> barrens, double weight) {
-		TheEndBiomeData.addEndBarrensReplacement(highlands, barrens, weight);
+		org.quiltmc.qsl.worldgen.biome.api.TheEndBiomes.addBarrensBiome(highlands, barrens, weight);
 	}
 }

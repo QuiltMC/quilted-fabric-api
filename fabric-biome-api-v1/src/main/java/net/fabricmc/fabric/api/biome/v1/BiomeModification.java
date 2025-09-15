@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +25,16 @@ import org.jetbrains.annotations.ApiStatus;
 
 import net.minecraft.util.Identifier;
 
-import net.fabricmc.fabric.impl.biome.modification.BiomeModificationImpl;
+import org.quiltmc.qsl.worldgen.biome.impl.modification.BiomeModificationImpl;
 
 /**
  * Provides methods for modifying biomes. To create an instance, call
  * {@link BiomeModifications#create(Identifier)}.
  *
  * @see BiomeModifications
+ * @deprecated see {@link org.quiltmc.qsl.worldgen.biome.api.BiomeModification}.
  */
+@Deprecated
 public class BiomeModification {
 	private final Identifier id;
 
@@ -45,8 +48,14 @@ public class BiomeModification {
 	 * for this are modifiers that simply add or remove features unconditionally, or change other values
 	 * to constants.
 	 */
+	@SuppressWarnings("unchecked")
 	public BiomeModification add(ModificationPhase phase, Predicate<BiomeSelectionContext> selector, Consumer<BiomeModificationContext> modifier) {
-		BiomeModificationImpl.INSTANCE.addModifier(id, phase, selector, modifier);
+		BiomeModificationImpl.INSTANCE.addModifier(
+				id,
+				phase.toQuilt(),
+				(Predicate<org.quiltmc.qsl.worldgen.biome.api.BiomeSelectionContext>) (Object) selector,
+				(Consumer<org.quiltmc.qsl.worldgen.biome.api.BiomeModificationContext>) (Object) modifier
+		);
 		return this;
 	}
 
@@ -58,8 +67,14 @@ public class BiomeModification {
 	 * conditions to the selector, and use a context-free modifier instead, as this will greatly help
 	 * with debugging world generation issues.
 	 */
+	@SuppressWarnings("unchecked")
 	public BiomeModification add(ModificationPhase phase, Predicate<BiomeSelectionContext> selector, BiConsumer<BiomeSelectionContext, BiomeModificationContext> modifier) {
-		BiomeModificationImpl.INSTANCE.addModifier(id, phase, selector, modifier);
+		BiomeModificationImpl.INSTANCE.addModifier(
+				id,
+				phase.toQuilt(),
+				(Predicate<org.quiltmc.qsl.worldgen.biome.api.BiomeSelectionContext>) (Object) selector,
+				(BiConsumer<org.quiltmc.qsl.worldgen.biome.api.BiomeSelectionContext, org.quiltmc.qsl.worldgen.biome.api.BiomeModificationContext>) (Object) modifier
+		);
 		return this;
 	}
 }

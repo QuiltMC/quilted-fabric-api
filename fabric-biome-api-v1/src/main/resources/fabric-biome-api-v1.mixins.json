@@ -3,15 +3,12 @@
   "package": "net.fabricmc.fabric.mixin.biome",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "BiomeSourceMixin",
-    "ChunkNoiseSamplerMixin",
-    "MultiNoiseBiomeSourceMixin",
-    "MultiNoiseUtilMultiNoiseSamplerMixin",
-    "NetherBiomePresetMixin",
-    "NoiseConfigMixin",
-    "TheEndBiomeSourceMixin",
-    "modification.DynamicRegistryManagerImmutableImplMixin",
-    "modification.MinecraftServerMixin"
+    "BiomeModificationContextImplMixin",
+    "BiomeSelectionContextImplMixin",
+    "EffectsContextImplMixin",
+    "GenerationSettingsContextImplMixin",
+    "SpawnSettingsContextImplMixin",
+    "WeatherContextImplMixin"
   ],
   "injectors": {
     "defaultRequire": 1

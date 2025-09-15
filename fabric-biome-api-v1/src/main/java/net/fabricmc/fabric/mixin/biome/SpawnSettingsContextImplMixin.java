@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package net.fabricmc.fabric.impl.biome;
+package net.fabricmc.fabric.mixin.biome;
 
-import net.minecraft.util.math.noise.PerlinNoiseSampler;
+import org.spongepowered.asm.mixin.Mixin;
 
-public interface MultiNoiseSamplerHooks {
-	PerlinNoiseSampler fabric_getEndBiomesSampler();
+import net.fabricmc.fabric.api.biome.v1.BiomeModificationContext;
 
-	void fabric_setSeed(long seed);
-
-	long fabric_getSeed();
-}
+@Mixin(targets = "org/quiltmc/qsl/worldgen/biome/impl/modification/BiomeModificationContextImpl$SpawnSettingsContextImpl")
+public abstract class SpawnSettingsContextImplMixin implements BiomeModificationContext.SpawnSettingsContext { }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package net.fabricmc.fabric.impl.biome;
+package net.fabricmc.fabric.mixin.biome;
 
-public interface BiomeSourceAccess {
-	boolean fabric_shouldModifyBiomeEntries();
+import org.spongepowered.asm.mixin.Mixin;
 
-	void fabric_setModifyBiomeEntries(boolean modifyBiomeEntries);
-}
+import net.fabricmc.fabric.api.biome.v1.BiomeModificationContext;
+
+@Mixin(targets = "org/quiltmc/qsl/worldgen/biome/impl/modification/BiomeModificationContextImpl$EffectsContextImpl")
+public abstract class EffectsContextImplMixin implements BiomeModificationContext.EffectsContext { }

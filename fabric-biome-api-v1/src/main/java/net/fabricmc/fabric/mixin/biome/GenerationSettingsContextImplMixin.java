@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package net.fabricmc.fabric.impl.biome.modification;
+package net.fabricmc.fabric.mixin.biome;
 
-/**
- * Prevents double-modification of biomes in the same dynamic registry manager from occurring and fails-fast
- * if it does occur.
- */
-public interface BiomeModificationMarker {
-	void fabric_markModified();
-}
+import org.spongepowered.asm.mixin.Mixin;
+
+import net.fabricmc.fabric.api.biome.v1.BiomeModificationContext;
+
+@Mixin(targets = "org/quiltmc/qsl/worldgen/biome/impl/modification/BiomeModificationContextImpl$GenerationSettingsContextImpl")
+public abstract class GenerationSettingsContextImplMixin implements BiomeModificationContext.GenerationSettingsContext { }
