@@ -9,3 +9,7 @@ testDependencies(project, [
 loom {
 	accessWidenerPath = file('src/main/resources/fabric-command-api-v2.accesswidener')
 }
+
+dependencies {
+	modApi getQslModule("management", "client_command")
+}

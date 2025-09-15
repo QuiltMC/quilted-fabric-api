@@ -18,5 +18,8 @@
  * API for creating client-sided commands.
  *
  * @see net.fabricmc.fabric.api.client.command.v2.ClientCommandManager
+ *
+ * @deprecated see {@link org.quiltmc.qsl.command.api.client}
  */
+@Deprecated
 package net.fabricmc.fabric.api.client.command.v2;

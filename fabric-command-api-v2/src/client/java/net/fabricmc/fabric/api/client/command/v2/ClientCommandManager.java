@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +22,6 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import org.jetbrains.annotations.Nullable;
-
-import net.fabricmc.fabric.impl.command.client.ClientCommandInternals;
 
 /**
  * Manages client-sided commands and provides some related helper methods.
@@ -59,7 +58,10 @@ import net.fabricmc.fabric.impl.command.client.ClientCommandInternals;
  * });
  * }
  * </pre>
+ *
+ * @deprecated see {@link org.quiltmc.qsl.command.api.client.ClientCommandManager}
  */
+@Deprecated
 public final class ClientCommandManager {
 	private ClientCommandManager() {
 	}
@@ -72,7 +74,7 @@ public final class ClientCommandManager {
 	 * @return active dispatcher if present
 	 */
 	public static @Nullable CommandDispatcher<FabricClientCommandSource> getActiveDispatcher() {
-		return ClientCommandInternals.getActiveDispatcher();
+		return (CommandDispatcher<FabricClientCommandSource>) (Object) org.quiltmc.qsl.command.api.client.ClientCommandManager.getDispatcher();
 	}
 
 	/**
