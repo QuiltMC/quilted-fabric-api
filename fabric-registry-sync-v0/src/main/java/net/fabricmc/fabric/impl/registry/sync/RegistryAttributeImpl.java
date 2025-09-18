@@ -20,21 +20,26 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
 
 import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
 import net.fabricmc.fabric.api.event.registry.RegistryAttributeHolder;
 
+import org.quiltmc.qsl.registry.impl.sync.registry.SynchronizedRegistry;
+
 public final class RegistryAttributeImpl implements RegistryAttributeHolder {
 	private static final Map<RegistryKey<?>, RegistryAttributeHolder> HOLDER_MAP = new ConcurrentHashMap<>();
+	private final RegistryKey<?> registryKey;
 
 	public static RegistryAttributeHolder getHolder(RegistryKey<?> registryKey) {
-		return HOLDER_MAP.computeIfAbsent(registryKey, key -> new RegistryAttributeImpl());
+		return HOLDER_MAP.computeIfAbsent(registryKey, RegistryAttributeImpl::new);
 	}
 
 	private final EnumSet<RegistryAttribute> attributes = EnumSet.noneOf(RegistryAttribute.class);
 
-	private RegistryAttributeImpl() {
+	private RegistryAttributeImpl(RegistryKey<?> registryKey) {
+		this.registryKey = registryKey;
 	}
 
 	@Override
@@ -45,6 +50,14 @@ public final class RegistryAttributeImpl implements RegistryAttributeHolder {
 
 	@Override
 	public boolean hasAttribute(RegistryAttribute attribute) {
-		return attributes.contains(attribute);
+		if (attributes.contains(attribute)) {
+			return true;
+		}
+
+		SynchronizedRegistry<?> registry = (SynchronizedRegistry<?>) Registries.REGISTRIES.get((RegistryKey) this.registryKey);
+		return switch (attribute) {
+		case MODDED -> registry.quilt$getContentStatus() != SynchronizedRegistry.Status.VANILLA;
+		case SYNCED -> registry.quilt$requiresSyncing();
+		};
 	}
 }

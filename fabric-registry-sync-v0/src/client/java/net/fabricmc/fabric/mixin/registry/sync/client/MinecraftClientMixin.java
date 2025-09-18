@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +26,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.registry.Registries;
 
-import net.fabricmc.fabric.impl.registry.sync.RegistrySyncManager;
-import net.fabricmc.fabric.impl.registry.sync.RemapException;
-import net.fabricmc.fabric.impl.registry.sync.trackers.vanilla.BlockInitTracker;
+import net.fabricmc.fabric.mixin.registry.sync.RegistriesAccessor;
 
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
@@ -39,22 +37,12 @@ public class MinecraftClientMixin {
 	@Final
 	private static Logger LOGGER;
 
-	// Unmap the registry before loading a new SP/MP setup.
-	@Inject(at = @At("RETURN"), method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;Z)V")
-	public void disconnectAfter(Screen disconnectionScreen, boolean bl, CallbackInfo ci) {
-		try {
-			RegistrySyncManager.unmap();
-		} catch (RemapException e) {
-			LOGGER.warn("Failed to unmap Fabric registries!", e);
-		}
-	}
-
 	@Inject(method = "<init>", at = @At(value = "INVOKE", target = "Ljava/lang/Thread;currentThread()Ljava/lang/Thread;"))
 	private void afterModInit(CallbackInfo ci) {
 		// Freeze the registries on the client
 		LOGGER.debug("Freezing registries");
-		Registries.bootstrap();
-		BlockInitTracker.postFreeze();
+		RegistriesAccessor.invokeFreezeRegistries();
+		RegistriesAccessor.invokeValidate(Registries.REGISTRIES);
 		ItemGroups.collect();
 	}
 }

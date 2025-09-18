@@ -5,18 +5,12 @@
   "mixins": [
     "BootstrapMixin",
     "ChunkSerializerMixin",
-    "DebugChunkGeneratorAccessor",
-    "ExperimentalRegistriesValidatorMixin",
-    "IdListMixin",
     "MainMixin",
     "RegistriesAccessor",
     "RegistriesMixin",
-    "RegistryKeysMixin",
-    "RegistryLoaderMixin",
-    "SaveLoadingMixin",
-    "SerializableRegistriesMixin",
-    "SimpleRegistryAccessor",
-    "SimpleRegistryMixin"
+    "SimpleRegistryMixin",
+    "quilt.DynamicRegistryManagerSetupContextImplMixin",
+    "quilt.workaround.DynamicRegistryManagerSetupContextImplMixin"
   ],
   "injectors": {
     "defaultRequire": 1

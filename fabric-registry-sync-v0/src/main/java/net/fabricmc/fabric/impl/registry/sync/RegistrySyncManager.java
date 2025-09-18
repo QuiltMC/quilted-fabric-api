@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -46,7 +48,6 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.screen.ScreenTexts;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerConfigurationNetworkHandler;
 import net.minecraft.server.network.ServerPlayerConfigurationTask;
 import net.minecraft.text.MutableText;
@@ -61,6 +62,8 @@ import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
 import net.fabricmc.fabric.impl.registry.sync.packet.DirectRegistryPacketHandler;
 import net.fabricmc.fabric.impl.registry.sync.packet.RegistryPacketHandler;
 
+import org.quiltmc.qsl.registry.impl.sync.registry.SynchronizedRegistry;
+
 public final class RegistrySyncManager {
 	public static final boolean DEBUG = Boolean.getBoolean("fabric.registry.debug");
 
@@ -69,31 +72,7 @@ public final class RegistrySyncManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger("FabricRegistrySync");
 	private static final boolean DEBUG_WRITE_REGISTRY_DATA = Boolean.getBoolean("fabric.registry.debug.writeContentsAsCsv");
 
-	//Set to true after vanilla's bootstrap has completed
-	public static boolean postBootstrap = false;
-
 	private RegistrySyncManager() { }
-
-	public static void configureClient(ServerConfigurationNetworkHandler handler, MinecraftServer server) {
-		if (!DEBUG && server.isHost(handler.getDebugProfile())) {
-			// Dont send in singleplayer
-			return;
-		}
-
-		if (!ServerConfigurationNetworking.canSend(handler, DIRECT_PACKET_HANDLER.getPacketId())) {
-			// Don't send if the client cannot receive
-			return;
-		}
-
-		final Map<Identifier, Object2IntMap<Identifier>> map = RegistrySyncManager.createAndPopulateRegistryMap();
-
-		if (map == null) {
-			// Don't send when there is nothing to map
-			return;
-		}
-
-		handler.addTask(new SyncConfigurationTask(handler, map));
-	}
 
 	public record SyncConfigurationTask(
 			ServerConfigurationNetworkHandler handler,
@@ -103,6 +82,11 @@ public final class RegistrySyncManager {
 
 		@Override
 		public void sendPacket(Consumer<Packet<?>> sender) {
+			if (map == null) {
+				handler.completeTask(KEY);
+				return;
+			}
+
 			DIRECT_PACKET_HANDLER.sendPacket(payload -> handler.sendPacket(ServerConfigurationNetworking.createS2CPacket(payload)), map);
 		}
 
@@ -138,7 +122,7 @@ public final class RegistrySyncManager {
 			}
 
 			try {
-				apply(map, RemappableRegistry.RemapMode.REMOTE);
+				apply(map);
 				return true;
 			} catch (RemapException e) {
 				throw new CompletionException(e);
@@ -196,7 +180,7 @@ public final class RegistrySyncManager {
 
 			RegistryAttributeHolder attributeHolder = RegistryAttributeHolder.get(registry.getKey());
 
-			if (!attributeHolder.hasAttribute(RegistryAttribute.SYNCED)) {
+			if (!attributeHolder.hasAttribute(RegistryAttribute.SYNCED) || ((SynchronizedRegistry<?>) registry).quilt$requiresSyncing()) {
 				LOGGER.debug("Not syncing registry: {}", registryId);
 				continue;
 			}
@@ -207,44 +191,42 @@ public final class RegistrySyncManager {
 			 * This will not sync IDs if a world has been previously modded, either from removed mods
 			 * or a previous version of fabric registry sync.
 			 */
-			if (!attributeHolder.hasAttribute(RegistryAttribute.MODDED)) {
+			if (((SynchronizedRegistry<?>) registry).quilt$getContentStatus() == SynchronizedRegistry.Status.VANILLA) {
 				LOGGER.debug("Skipping un-modded registry: " + registryId);
 				continue;
 			}
 
 			LOGGER.debug("Syncing registry: " + registryId);
 
-			if (registry instanceof RemappableRegistry) {
-				Object2IntMap<Identifier> idMap = new Object2IntLinkedOpenHashMap<>();
-				IntSet rawIdsFound = DEBUG ? new IntOpenHashSet() : null;
+			Object2IntMap<Identifier> idMap = new Object2IntLinkedOpenHashMap<>();
+			IntSet rawIdsFound = DEBUG ? new IntOpenHashSet() : null;
 
-				for (Object o : registry) {
-					//noinspection unchecked
-					Identifier id = registry.getId(o);
-					if (id == null) continue;
+			for (Object o : registry) {
+				//noinspection unchecked
+				Identifier id = registry.getId(o);
+				if (id == null) continue;
 
-					//noinspection unchecked
-					int rawId = registry.getRawId(o);
+				//noinspection unchecked
+				int rawId = registry.getRawId(o);
 
-					if (DEBUG) {
-						if (registry.get(id) != o) {
-							LOGGER.error("[fabric-registry-sync] Inconsistency detected in " + registryId + ": object " + o + " -> string ID " + id + " -> object " + registry.get(id) + "!");
-						}
-
-						if (registry.get(rawId) != o) {
-							LOGGER.error("[fabric-registry-sync] Inconsistency detected in " + registryId + ": object " + o + " -> integer ID " + rawId + " -> object " + registry.get(rawId) + "!");
-						}
-
-						if (!rawIdsFound.add(rawId)) {
-							LOGGER.error("[fabric-registry-sync] Inconsistency detected in " + registryId + ": multiple objects hold the raw ID " + rawId + " (this one is " + id + ")");
-						}
+				if (DEBUG) {
+					if (registry.get(id) != o) {
+						LOGGER.error("[fabric-registry-sync] Inconsistency detected in " + registryId + ": object " + o + " -> string ID " + id + " -> object " + registry.get(id) + "!");
 					}
 
-					idMap.put(id, rawId);
+					if (registry.get(rawId) != o) {
+						LOGGER.error("[fabric-registry-sync] Inconsistency detected in " + registryId + ": object " + o + " -> integer ID " + rawId + " -> object " + registry.get(rawId) + "!");
+					}
+
+					if (!rawIdsFound.add(rawId)) {
+						LOGGER.error("[fabric-registry-sync] Inconsistency detected in " + registryId + ": multiple objects hold the raw ID " + rawId + " (this one is " + id + ")");
+					}
 				}
 
-				map.put(registryId, idMap);
+				idMap.put(id, rawId);
 			}
+
+			map.put(registryId, idMap);
 		}
 
 		if (map.isEmpty()) {
@@ -254,10 +236,8 @@ public final class RegistrySyncManager {
 		return map;
 	}
 
-	public static void apply(Map<Identifier, Object2IntMap<Identifier>> map, RemappableRegistry.RemapMode mode) throws RemapException {
-		if (mode == RemappableRegistry.RemapMode.REMOTE) {
-			checkRemoteRemap(map);
-		}
+	public static void apply(Map<Identifier, Object2IntMap<Identifier>> map) throws RemapException {
+		checkRemoteRemap(map);
 
 		Set<Identifier> containedRegistries = Sets.newHashSet(map.keySet());
 
@@ -269,18 +249,19 @@ public final class RegistrySyncManager {
 			Object2IntMap<Identifier> registryMap = map.get(registryId);
 			Registry<?> registry = Registries.REGISTRIES.get(registryId);
 
-			RegistryAttributeHolder attributeHolder = RegistryAttributeHolder.get(registry.getKey());
-
-			if (!attributeHolder.hasAttribute(RegistryAttribute.MODDED)) {
+			if (((SynchronizedRegistry<?>) registry).quilt$getContentStatus() == SynchronizedRegistry.Status.VANILLA) {
 				LOGGER.debug("Not applying registry data to vanilla registry {}", registryId.toString());
 				continue;
 			}
 
-			if (registry instanceof RemappableRegistry remappableRegistry) {
-				remappableRegistry.remap(registryId.toString(), registryMap, mode);
-			} else {
-				throw new RemapException("Registry " + registryId + " is not remappable");
+			var syncMap = new HashMap<String, Collection<SynchronizedRegistry.SyncEntry>>();
+
+			for (Object2IntMap.Entry<Identifier> entry2 : registryMap.object2IntEntrySet()) {
+				syncMap.computeIfAbsent(entry2.getKey().getNamespace(), (x) -> new ArrayList<>())
+						.add(new SynchronizedRegistry.SyncEntry(entry2.getKey().getPath(), entry2.getIntValue(), (byte) 0));
 			}
+
+			((SynchronizedRegistry<?>) registry).quilt$applySyncMap(syncMap);
 		}
 
 		if (!containedRegistries.isEmpty()) {
@@ -357,19 +338,5 @@ public final class RegistrySyncManager {
 		}
 
 		throw new RemapException(text);
-	}
-
-	public static void unmap() throws RemapException {
-		for (Identifier registryId : Registries.REGISTRIES.getIds()) {
-			Registry registry = Registries.REGISTRIES.get(registryId);
-
-			if (registry instanceof RemappableRegistry) {
-				((RemappableRegistry) registry).unmap(registryId.toString());
-			}
-		}
-	}
-
-	public static void bootstrapRegistries() {
-		postBootstrap = true;
 	}
 }

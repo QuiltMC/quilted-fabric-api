@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,51 +18,28 @@
 package net.fabricmc.fabric.mixin.registry.sync;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.Bootstrap;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 
-import net.fabricmc.fabric.impl.registry.sync.RegistrySyncManager;
-import net.fabricmc.fabric.impl.registry.sync.trackers.StateIdTracker;
-import net.fabricmc.fabric.impl.registry.sync.trackers.vanilla.BlockInitTracker;
-import net.fabricmc.fabric.impl.registry.sync.trackers.vanilla.BlockItemTracker;
+import org.quiltmc.loader.api.entrypoint.EntrypointUtil;
+import org.quiltmc.qsl.base.api.entrypoint.ModInitializer;
 
 @Mixin(Bootstrap.class)
 public class BootstrapMixin {
-	@Inject(method = "setOutputStreams", at = @At("RETURN"))
-	private static void initialize(CallbackInfo info) {
-		// These seemingly pointless accesses are done to make sure each
-		// static initializer is called, to register vanilla-provided blocks
-		// and items from the respective classes - otherwise, they would
-		// duplicate our calls from below.
-		Object oBlock = Blocks.AIR;
-		Object oFluid = Fluids.EMPTY;
-		Object oItem = Items.AIR;
-
-		// state ID tracking
-		StateIdTracker.register(Registries.BLOCK, Block.STATE_IDS, (block) -> block.getStateManager().getStates());
-		StateIdTracker.register(Registries.FLUID, Fluid.STATE_IDS, (fluid) -> fluid.getStateManager().getStates());
-
-		// map tracking
-		BlockItemTracker.register(Registries.ITEM);
-
-		// block initialization, like Blocks
-		BlockInitTracker.register(Registries.BLOCK);
-
-		RegistrySyncManager.bootstrapRegistries();
-	}
+	@Shadow
+	private static void setOutputStreams() { }
 
 	@Redirect(method = "initialize", at = @At(value = "INVOKE", target = "Lnet/minecraft/registry/Registries;bootstrap()V"))
 	private static void initialize() {
 		Registries.init();
+
+		// .Quilt code for initializing its main entrypoint
+		setOutputStreams(); // We need to make this a bit early in case a mod uses System.out to print stuff
+
+		EntrypointUtil.invoke(ModInitializer.ENTRYPOINT_KEY, ModInitializer.class, ModInitializer::onInitialize);
 	}
 }

@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2025 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +30,6 @@ import net.minecraft.registry.Registries;
 import net.minecraft.server.Main;
 
 import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.impl.registry.sync.trackers.vanilla.BlockInitTracker;
 import net.fabricmc.loader.api.FabricLoader;
 
 @Mixin(Main.class)
@@ -44,8 +44,8 @@ public class MainMixin {
 			// Freeze the registries on the server
 			LOGGER.debug("Freezing registries");
 
-			Registries.bootstrap();
-			BlockInitTracker.postFreeze();
+			RegistriesAccessor.invokeFreezeRegistries();
+			RegistriesAccessor.invokeValidate(Registries.REGISTRIES);
 			ItemGroups.collect();
 		}
 	}

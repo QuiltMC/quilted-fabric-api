@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +25,6 @@ import org.jetbrains.annotations.Unmodifiable;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryLoader;
-
-import net.fabricmc.fabric.impl.registry.sync.DynamicRegistriesImpl;
 
 /**
  * Contains methods for registering and accessing dynamic {@linkplain Registry registries}.
@@ -73,7 +72,10 @@ import net.fabricmc.fabric.impl.registry.sync.DynamicRegistriesImpl;
  * // @link substring=registerSynced target="#registerSynced(RegistryKey, Codec, Codec, SyncOption...)":
  * DynamicRegistries.registerSynced(MY_DATA_KEY, MyData.CODEC, MyData.NETWORK_CODEC);
  * }
+ *
+ * @deprecated see {@link org.quiltmc.qsl.registry.api.dynamic.DynamicMetaRegistry}
  */
+@Deprecated
 public final class DynamicRegistries {
 	private DynamicRegistries() {
 	}
@@ -86,7 +88,7 @@ public final class DynamicRegistries {
 	 * @return an unmodifiable list of all dynamic registries
 	 */
 	public static @Unmodifiable List<RegistryLoader.Entry<?>> getDynamicRegistries() {
-		return DynamicRegistriesImpl.getDynamicRegistries();
+		return List.copyOf(RegistryLoader.DYNAMIC_REGISTRIES);
 	}
 
 	/**
@@ -100,7 +102,7 @@ public final class DynamicRegistries {
 	 * @param <T>   the entry type of the registry
 	 */
 	public static <T> void register(RegistryKey<? extends Registry<T>> key, Codec<T> codec) {
-		DynamicRegistriesImpl.register(key, codec);
+		org.quiltmc.qsl.registry.api.dynamic.DynamicMetaRegistry.register(key, codec);
 	}
 
 	/**
@@ -140,8 +142,7 @@ public final class DynamicRegistries {
 	 * @param <T>          the entry type of the registry
 	 */
 	public static <T> void registerSynced(RegistryKey<? extends Registry<T>> key, Codec<T> dataCodec, Codec<T> networkCodec, SyncOption... options) {
-		DynamicRegistriesImpl.register(key, dataCodec);
-		DynamicRegistriesImpl.addSyncedRegistry(key, networkCodec, options);
+		org.quiltmc.qsl.registry.api.dynamic.DynamicMetaRegistry.registerSynced(key, dataCodec, networkCodec);
 	}
 
 	/**

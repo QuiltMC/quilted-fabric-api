@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2016, 2017, 2018, 2019 FabricMC
+ * Copyright 2022 The Quilt Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +34,10 @@ import net.minecraft.registry.RegistryKey;
  * the combined registry manager, and each layer holds different registries. For example, the biome
  * registry is not loaded in the {@link net.minecraft.registry.ServerDynamicRegistryType#DIMENSIONS}
  * layer.
+ *
+ * @deprecated see {@link org.quiltmc.qsl.registry.api.event.DynamicRegistryManagerSetupContext}
  */
+@Deprecated
 @ApiStatus.NonExtendable
 public interface DynamicRegistryView {
 	/**
