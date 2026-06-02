@@ -1,3 +1,9 @@
+> [!WARNING]
+> As of Minecraft version `26.1`, this project has been archived and will no longer be ported to new versions.
+> Development continues on the upstream [Fabric API](https://github.com/fabricmc/fabric-api), which serves the same function as this mod on newer versions.
+> 
+> You are welcome to submit pull requests for older Minecraft versions, though any ports must be developed separately (with our support, if you'd like to talk to us on [Discord](https://discord.quiltmc.org)!). Pull requests updating this repository to `26.1+` will not be considered.
+
 # Fabric API
 
 Essential hooks for modding with Fabric.
